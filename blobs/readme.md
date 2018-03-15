@@ -3,29 +3,29 @@
 ## Current details of implementation:
 
 - `genCombinations1` means "generator of all combinations on 1 dimension"
-and `genCombinations2` is for "generator of all combinations of 2 dimensions"
+- `genCombinations2` means "generator of all combinations of 2 dimensions"
 - In `genCombinations1`, elements in the output set are sorted.  
 - In `genCombinations2`, elements in the output set are sorted by the first subelement (`[0,...]` will be first, `[1,...]` second etc...).  
 
 Examples of uses:
-    
+
 `genCombinations2([0,1,2,3,4,5,6], 3, 2);` should yield:
-1- `[[0,1],[2,3],[4,5]]`
-2- `[[0,1],[2,3],[4,6]]`
-3- `[[0,1],[2,3],[5,6]]`
-4- `[[0,1],[2,4],[5,6]]`
-5- `[[0,1],[2,5],[4,6]]`
-6- `[[0,1],[2,6],[4,5]]`
-7- `[[0,1],[3,4],[5,6]]`
- ...
-105- `[[1,2],[3,4],[5,6]]`
- 
+- 1 `[[0,1],[2,3],[4,5]]`
+- 2 `[[0,1],[2,3],[4,6]]`
+- 3 `[[0,1],[2,3],[5,6]]`
+- 4 `[[0,1],[2,4],[5,6]]`
+- 5 `[[0,1],[2,5],[4,6]]`
+- 6 `[[0,1],[2,6],[4,5]]`
+- 7 `[[0,1],[3,4],[5,6]]`
+- ...
+- 105 `[[1,2],[3,4],[5,6]]`
+
 `genCombinations1([0,1,2,3,4], 4);` should yield:
-1- `[0,1,2,3]`
-2- `[0,1,2,4]`
-3- `[0,1,3,4]`
-4- `[0,2,3,4]`
-5- `[1,2,3,4]`
+- 1 `[0,1,2,3]`
+- 2 `[0,1,2,4]`
+- 3 `[0,1,3,4]`
+- 4 `[0,2,3,4]`
+- 5 `[1,2,3,4]`
 
 ## Technicals
 
