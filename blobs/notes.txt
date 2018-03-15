@@ -1,0 +1,83 @@
+TEAMS    2 to 6
+
+n Cards:
+Teams size > Number of teams
+Size 1 > n
+Size 2 > [value of size 2 with n-1 cards]+n-1
+Size 3 > [value of size with n-1 cards]+[value of 2 team with n-1 cards]
+...
+Size m > [value of size m with n-1 cards]+[value of m-1 team with n-1 cards]
+
+
+
+6 Cards:
+teams size > teamsNuber > Battles (Uncumulated)
+1 > 6 > 57
+2 > 15 > 117 (60)
+3 > 20 > 127 (10)
+
+7 Cards:
+1 > 7 > 119
+2 > 21 > 329 (210)
+3 > 35 > 399 (70)
+
+8 Cards:
+1 > 8 > 238
+2 > 28 > 868 (630)
+3 > 56 > 1148 (280)
+
+9 Cards:
+1 > 9 > 456
+2 > 36 > 2094 (1638)
+3 > 84 > 2934 (840)
+
+10 Cards:
+1 > 10 > 837
+2 > 45 > 4617 (3780)
+3 > 120 > 6717 (2100)
+
+11 Cards:
+1 > 11 > 1474
+2 > 55 > 9394 (7920)
+3 > 165 > 14014 (6094)
+
+
+t = 5 (01234)
+
+n = 2
+s = 2
+
+- 0 1 (234)
+	- 2 3
+	- 2 4 
+	- 3 4
+- 0 2 (134)
+	- 1 3
+	- 1 4
+	- 3 4
+- 1 2 (34)
+	- 3 4
+- 0 3 (124)
+	- 1 2
+	- 1 4
+	- 2 4
+- 1 3 (24)
+	- 2 4
+- 2 3 (4)
+- 0 4 (123)
+	- 1 2
+	- 1 3
+	- 2 3
+- 1 4 (23)
+	- 2 3
+- 2 4 (5)
+- 3 4 ()
+
+set = [0 1 2 3 4 ... t-1]
+t = len(set)
+n = 2
+s = 2
+foreach(c of t C n)
+	t2 = 3
+	subset = set \ elems of c
+	
