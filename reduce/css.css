@@ -1,0 +1,14 @@
+textArea {
+	word-wrap:break-word; 
+	word-break:break-all;
+	display:relative;
+	width:95%;
+	height:500px;
+	resize:vertical;
+	color:#555;
+	background-color: #FFF;
+	border: 1px solid #AAA;
+	border-radius: 3px 3px 0px 3px;
+	padding: .2em .1em;
+	margin: auto 1em;
+}

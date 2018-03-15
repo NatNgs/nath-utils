@@ -1,0 +1,36 @@
+<html>
+<head>
+	<meta charset="UTF-8"> 
+	<link href="css.css" rel="stylesheet" type="text/css">
+	<script src="wrdfndr3.js"></script>
+	<script>
+	window.onload = function() {
+		const fileInput = document.getElementById('fileInput');
+		const fileDisplayArea = document.getElementById('fileDisplayArea');
+		
+		const cb = (text)=>fileDisplayArea.value = text;
+
+		fileInput.addEventListener('change', e=>{
+			var file = fileInput.files[0];
+			//var textType = /text.*/;
+
+			//if (file.type.match(textType)) {
+				var reader = new FileReader();
+				reader.onload = e=>textLoaded(reader.result,cb);
+				reader.readAsText(file);
+			/*} else {
+				alert("File not supported!")
+			}*/
+		});
+	}
+	</script>
+</style>
+</head>
+<body>
+	<div>
+		Select a text file: 
+		<input type="file" id="fileInput">
+	</div>
+	<textarea id="fileDisplayArea"></textarea>
+</body>
+</html>
