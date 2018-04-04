@@ -18,6 +18,7 @@ public class Server {
 	/**
 	 * Open the server on specified port.
 	 * Starting to accept clients if maxAllowedClients was set to a positive number.
+	 *
 	 * @param port if negative, will be randomized
 	 * @throws IOException In case of problem to open the server socket
 	 * @see Server#close
@@ -35,30 +36,31 @@ public class Server {
 
 	/**
 	 * Close the server and disconnect all active client connections.
+	 *
 	 * @see Server#open
 	 */
 	public void close() {
 		try {
 			this.isOpen = false;
-			for(SrvClientSocket client : clients.values()) {
+			for (SrvClientSocket client : clients.values()) {
 				client.forceDisconnect();
 			}
 			socket.close();
 			clients.clear();
-		} catch (IOException ignored) {}
+		} catch (IOException ignored) {
+		}
 	}
 
 	/**
-	 * @param cmdCode code of the command that starts every REST message calling to it
-	 * @param rule identifier of the receiver to call, to differentiate receivers using the same cmdCode
+	 * @param cmdCode  code of the command that starts every REST message calling to it
+	 * @param rule     identifier of the receiver to call, to differentiate receivers using the same cmdCode
 	 * @param receiver the receiver to be called when the command REST is received and rule is applied
-	 *
 	 * @return receiver that was corresponding to cmdCode and rule before the change (null if it is a new cmdCode/rule)
 	 * @see Server#unsetReceiver(String)
 	 * @see Server#unsetReceiver(String, String)
 	 */
 	public IServerCmdReceiver registerReceiver(String cmdCode, String rule, IServerCmdReceiver receiver) {
-		if(!receivers.containsKey(cmdCode)) {
+		if (!receivers.containsKey(cmdCode)) {
 			receivers.put(cmdCode, new HashMap<>());
 		}
 		return this.receivers.get(cmdCode).put(rule, receiver);
@@ -66,7 +68,6 @@ public class Server {
 
 	/**
 	 * @param cmdCode Command of the register to unset (all corresponding rules will be unset)
-	 *
 	 * @see Server#unsetReceiver(String, String)
 	 * @see Server#registerReceiver
 	 */
@@ -76,14 +77,13 @@ public class Server {
 
 	/**
 	 * @param cmdCode Command of the register to unset
-	 * @param rule identifier of the receiver to unset
-	 *
-	 * Server#unsetReceiver(String)
+	 * @param rule    identifier of the receiver to unset
+	 * @see Server#unsetReceiver(String)
 	 * @see Server#registerReceiver
 	 */
 	public void unsetReceiver(String cmdCode, String rule) {
 		this.receivers.get(cmdCode).remove(rule);
-		if(this.receivers.get(cmdCode).isEmpty()) {
+		if (this.receivers.get(cmdCode).isEmpty()) {
 			this.receivers.remove(cmdCode);
 		}
 	}
@@ -102,8 +102,8 @@ public class Server {
 
 	/**
 	 * @param clientIdentifier Client that changed of rule
-	 * @param cmdCode Command that change of rule
-	 * @param newRule new rule to follow
+	 * @param cmdCode          Command that change of rule
+	 * @param newRule          new rule to follow
 	 * @return last active rule
 	 */
 	public String setActiveRule(String clientIdentifier, String cmdCode, String newRule) {
@@ -112,11 +112,12 @@ public class Server {
 
 	/**
 	 * Get server local address
+	 *
 	 * @param preferIpv4 'true' to force return IPV4 address
-	 * @return
-	 * 		- String like: '[123.45.67.89]:4224'
-	 * 		(or ipv6: '[1fff:0:a88:85a3::ac1f]:8001')
-	 * 		- 'null' if failed to find.
+	 * @return - String like: '[123.45.67.89]:4224'
+	 * (or ipv6: '[1fff:0:a88:85a3::ac1f]:8001')
+	 * - String without port if not connected like '[123.45.67.89]'
+	 * - 'null' if failed to find.
 	 */
 	public String getLocalAddress(boolean preferIpv4) {
 		try {
@@ -126,11 +127,16 @@ public class Server {
 				for (Enumeration en2 = i.getInetAddresses(); en2.hasMoreElements(); ) {
 					InetAddress addr = (InetAddress)en2.nextElement();
 					if (!preferIpv4 || addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
-						return "[" + addr.getHostAddress() + "]:" + socket.getLocalPort();
+						if (isOpen) {
+							return "[" + addr.getHostAddress() + "]:" + socket.getLocalPort();
+						} else {
+							return "[" + addr.getHostAddress() + "]";
+						}
 					}
 				}
 			}
-		} catch(SocketException ignored) {}
+		} catch (SocketException ignored) {
+		}
 		return null;
 	}
 
@@ -178,7 +184,8 @@ public class Server {
 				while (this.isOpen && clients.size() < this.maxAllowedClients) {
 					onClientConnected(new SrvClientSocket(this.socket.accept()));
 				}
-			} catch (IOException ignored) {}
+			} catch (IOException ignored) {
+			}
 			this.acceptingClientsThread = null;
 		});
 		acceptingClientsThread.start();

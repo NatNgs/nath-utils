@@ -12,7 +12,7 @@ import java.util.Map;
 	private final Socket socket;
 	private final BufferedReader in;
 	private final OutputStreamWriter out;
-	private Map<String /*CmdCode*/, String /*Rule*/> currentRights = new HashMap<>();
+	private final Map<String /*CmdCode*/, String /*Rule*/> currentRights = new HashMap<>();
 
 	/*package*/ SrvClientSocket(Socket socket) throws IOException {
 		this.socket = socket;
@@ -24,7 +24,7 @@ import java.util.Map;
 	 * setRight(cmdCode, null) to remove the right
 	 */
 	/*package*/ String setRule(String cmdCode, String rule) {
-		if(rule == null) {
+		if (rule == null) {
 			return this.currentRights.remove(cmdCode);
 		}
 		return this.currentRights.put(cmdCode, rule);
@@ -42,11 +42,15 @@ import java.util.Map;
 		try {
 			out.write(fullMessageToSend);
 			out.flush();
-		} catch (IOException ignored) {}
+		} catch (IOException ignored) {
+		}
 	}
 
 	/*package*/ void forceDisconnect() {
-		try { socket.close(); } catch (IOException ignored) {}
+		try {
+			socket.close();
+		} catch (IOException ignored) {
+		}
 	}
 
 	/*package*/ String waitForNextMessage() throws IOException {
