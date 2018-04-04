@@ -1,9 +1,9 @@
 package natngs.utils.clt;
 
-public abstract class AClientCmdSender {
+public abstract class AClientCmdEmitter {
 	private final Client client;
 
-	protected AClientCmdSender(Client client) {
+	protected AClientCmdEmitter(Client client) {
 		this.client = client;
 	}
 

@@ -142,7 +142,12 @@ public class Client {
 	 */
 	/*package*/ void sendCmd(String cmdCode, String params) {
 		try {
-			out.write(cmdCode + ' ' + params);
+			out.write(cmdCode);
+			if(params != null && !params.isEmpty()) {
+				out.write(' ');
+				out.write(params);
+			}
+			out.write('\n');
 			out.flush();
 		} catch (IOException ignored) {
 		}

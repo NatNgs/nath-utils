@@ -1,9 +1,9 @@
 package natngs.utils.srv;
 
-public abstract class AServerCmdSender {
+public abstract class AServerCmdEmitter {
 	private final Server server;
 
-	protected AServerCmdSender(Server server) {
+	protected AServerCmdEmitter(Server server) {
 		this.server = server;
 	}
 

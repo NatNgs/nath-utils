@@ -38,12 +38,16 @@ import java.util.Map;
 		return socket.getInetAddress().getHostAddress();
 	}
 
-	/*package*/ void send(String fullMessageToSend) {
+	/*package*/ void send(String cmdCode, String params) {
 		try {
-			out.write(fullMessageToSend);
+			out.write(cmdCode);
+			if (params != null && !params.isEmpty()) {
+				out.write(' ');
+				out.write(params);
+			}
+			out.write('\n');
 			out.flush();
-		} catch (IOException ignored) {
-		}
+		} catch (IOException ignored) {}
 	}
 
 	/*package*/ void forceDisconnect() {

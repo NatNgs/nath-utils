@@ -145,7 +145,7 @@ public class Server {
 	 */
 	/*package*/ void sendCmd(String cmdCode, String params, String[] clients) {
 		for (String clientIdentifier : clients) {
-			this.clients.get(clientIdentifier).send(cmdCode + ' ' + params);
+			this.clients.get(clientIdentifier).send(cmdCode, params);
 		}
 	}
 
@@ -154,7 +154,7 @@ public class Server {
 	 */
 	/*package*/ void sendCmdBroadcast(String cmdCode, String params) {
 		for (SrvClientSocket client : this.clients.values()) {
-			client.send(cmdCode + ' ' + params);
+			client.send(cmdCode, params);
 		}
 	}
 
