@@ -30,8 +30,9 @@
 				<span class="textBase">Base:</span>
 				<input id="fromS" disabled=true value="10">
 				<br/>
-				<button id="autoFrom" disabled=true onClick="autoAreaFrom()">Fill Alphabet</button>
-				<button id="shuffleFrom" onClick="shuffleAlphabetFrom()">Shuffle Alphabet</button>
+				<button id="autoFrom" disabled=true onClick="autoAreaFrom()">Auto Fill</button>
+				<button id="shuffleFrom" onClick="shuffleAlphabetFrom()">Shuffle</button>
+				<button id="sortFrom" onClick="sortAlphabetFrom()">Sort</button>
 			</td>
 			<td align=center>
 				<span class="textBase">Alphabet:</span>
@@ -39,7 +40,9 @@
 				<span class="textBase">Base:</span>
 				<input id="toS" disabled=true value="16">
 				<br/>
-				<button id="shuffleTo" onClick="shuffleAlphabetTo()">Shuffle Alphabet</button>
+				<button id="copyFromInTo" onClick="copyAlphabetFrominTo()">Import Alphabet From</button>
+				<button id="shuffleTo" onClick="shuffleAlphabetTo()">Shuffle</button>
+				<button id="sortTo" onClick="sortAlphabetTo()">Sort</button>
 			</td>
 		</tr>
 		<tr>
@@ -63,6 +66,13 @@
 		<tr><td>Ver.</td>
 			<td>Date</td>
 			<td>Description</td>
+		</tr>
+		<tr><td>1.3</td>
+			<td>July 2018</td>
+			<td>
+				Added button to add all characteds from alphabet source to alphabet destination<br/>
+				Added Sort Alphabet button
+			</td>
 		</tr>
 		<tr><td>1.2</td>
 			<td>February 2018</td>
