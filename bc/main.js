@@ -176,3 +176,23 @@ function shuffleAlphabetFrom() {
 function shuffleAlphabetTo() {
 	_AlphabetTo.value = strSuffhle(_AlphabetTo.value)
 }
+
+function sortAlphabetFrom() {
+	_AlphabetFrom.value = _AlphabetFrom.value.split("").sort().join("")
+}
+
+function sortAlphabetTo() {
+	_AlphabetTo.value = _AlphabetTo.value.split("").sort().join("")
+}
+
+function copyAlphabetFrominTo() {
+	let alphaTo = _AlphabetTo.value
+	let alphaFrom = _AlphabetFrom.value
+	
+	for(let i=alphaFrom.length-1; i>=0; --i)
+		if(alphaTo.indexOf(alphaFrom[i])<0)
+			alphaTo+=alphaFrom[i]
+
+	_AlphabetTo.value = alphaTo
+	checkInputs()
+}
