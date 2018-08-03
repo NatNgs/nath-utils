@@ -7,7 +7,7 @@ public abstract class AClientCmdEmitter {
 		this.client = client;
 	}
 
-	protected void send(String cmdCode, String params) {
-		client.sendCmd(cmdCode, params);
+	protected void send(String cmdCode, Object params) {
+		client.sendCmd(cmdCode, params.toString());
 	}
 }

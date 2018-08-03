@@ -11,7 +11,7 @@ public abstract class AServerCmdEmitter {
 		server.sendCmd(cmdCode, params, clients);
 	}
 
-	protected void sendBroadcast(String cmdCode, String params) {
-		server.sendCmdBroadcast(cmdCode, params);
+	protected void sendBroadcast(String cmdCode, Object params) {
+		server.sendCmdBroadcast(cmdCode, params.toString());
 	}
 }

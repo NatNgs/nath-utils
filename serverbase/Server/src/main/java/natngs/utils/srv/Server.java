@@ -2,18 +2,22 @@ package natngs.utils.srv;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Server {
 	private final Map<String /*client identifier*/, SrvClientSocket> clients = new HashMap<>();
-	private final Map<String /*cmdCode*/, Map<String /*rule*/, IServerCmdReceiver>> receivers = new HashMap<>();
+	private final Map<String /*cmdCode*/, Map<String /*phase*/, IServerCmdReceiver>> receivers = new HashMap<>();
+
+	public static boolean debugMode = false;
 
 	private ServerSocket socket = null;
 	private int maxAllowedClients = 0;
 	private boolean isOpen = false;
 	private Thread acceptingClientsThread = null;
+	private String defaultPhase = "";
 
 	/**
 	 * Open the server on specified port.
@@ -47,23 +51,22 @@ public class Server {
 			}
 			socket.close();
 			clients.clear();
-		} catch (IOException ignored) {
-		}
+		} catch (IOException ignored) {}
 	}
 
 	/**
 	 * @param cmdCode  code of the command that starts every REST message calling to it
-	 * @param rule     identifier of the receiver to call, to differentiate receivers using the same cmdCode
-	 * @param receiver the receiver to be called when the command REST is received and rule is applied
-	 * @return receiver that was corresponding to cmdCode and rule before the change (null if it is a new cmdCode/rule)
+	 * @param phase    identifier of the receiver to call, to differentiate receivers using the same cmdCode
+	 * @param receiver the receiver to be called when the command REST is received and phase is applied
+	 * @return receiver that was corresponding to cmdCode and phase before the change (null if it is a new cmdCode/phase)
 	 * @see Server#unsetReceiver(String)
 	 * @see Server#unsetReceiver(String, String)
 	 */
-	public IServerCmdReceiver registerReceiver(String cmdCode, String rule, IServerCmdReceiver receiver) {
+	public IServerCmdReceiver registerReceiver(String cmdCode, String phase, IServerCmdReceiver receiver) {
 		if (!receivers.containsKey(cmdCode)) {
 			receivers.put(cmdCode, new HashMap<>());
 		}
-		return this.receivers.get(cmdCode).put(rule, receiver);
+		return this.receivers.get(cmdCode).put(phase, receiver);
 	}
 
 	/**
@@ -77,17 +80,20 @@ public class Server {
 
 	/**
 	 * @param cmdCode Command of the register to unset
-	 * @param rule    identifier of the receiver to unset
+	 * @param phase   identifier of the receiver to unset
 	 * @see Server#unsetReceiver(String)
 	 * @see Server#registerReceiver
 	 */
-	public void unsetReceiver(String cmdCode, String rule) {
-		this.receivers.get(cmdCode).remove(rule);
+	public void unsetReceiver(String cmdCode, String phase) {
+		this.receivers.get(cmdCode).remove(phase);
 		if (this.receivers.get(cmdCode).isEmpty()) {
 			this.receivers.remove(cmdCode);
 		}
 	}
 
+	public void setDefaultPhase(String newDefaultPhase) {
+		this.defaultPhase = newDefaultPhase;
+	}
 
 	/**
 	 * @param maxAllowedClients total number of clients allowed. '-1' to stop accepting clients
@@ -101,13 +107,14 @@ public class Server {
 	}
 
 	/**
-	 * @param clientIdentifier Client that changed of rule
-	 * @param cmdCode          Command that change of rule
-	 * @param newRule          new rule to follow
-	 * @return last active rule
+	 * @param clientsIdentifier Client(s) that changed of phase
+	 * @param newPhase          new phase of the client
 	 */
-	public String setActiveRule(String clientIdentifier, String cmdCode, String newRule) {
-		return this.clients.get(clientIdentifier).setRule(cmdCode, newRule);
+	public void setActivePhase(String newPhase, String... clientsIdentifier) {
+		print(false, "Clients " + Arrays.toString(clientsIdentifier) + " are now in phase "+newPhase);
+		for(String clientIdentifier : clientsIdentifier) {
+			this.clients.get(clientIdentifier).phase = newPhase;
+		}
 	}
 
 	/**
@@ -140,10 +147,12 @@ public class Server {
 		return null;
 	}
 
+
 	/**
 	 * Send a message to one or multiple clients
 	 */
 	/*package*/ void sendCmd(String cmdCode, String params, String[] clients) {
+		System.out.println("Sent to "+ Arrays.toString(clients) +": " + cmdCode + (params != null ? ' ' + params : ""));
 		for (String clientIdentifier : clients) {
 			this.clients.get(clientIdentifier).send(cmdCode, params);
 		}
@@ -153,14 +162,17 @@ public class Server {
 	 * Send a message to all connected clients
 	 */
 	/*package*/ void sendCmdBroadcast(String cmdCode, String params) {
+		System.out.println("Sent to all clients: " + cmdCode + (params != null ? ' ' + params : ""));
 		for (SrvClientSocket client : this.clients.values()) {
 			client.send(cmdCode, params);
 		}
 	}
 
+
 	private void onClientConnected(final SrvClientSocket client) {
 		final String clientIdentifier = client.getIdentifier();
 		new Thread(()->{
+			print(false, "Client connected: " + clientIdentifier+", starting in phase "+defaultPhase);
 			this.clients.put(clientIdentifier, client);
 			try {
 				do {
@@ -169,6 +181,7 @@ public class Server {
 			} catch (IOException ioe) {
 				// On client disconnected
 				this.clients.remove(clientIdentifier);
+				print(false, "Client disconnected: "+clientIdentifier);
 				acceptingNewClients();
 			}
 		}).start();
@@ -180,27 +193,60 @@ public class Server {
 		}
 
 		this.acceptingClientsThread = new Thread(()->{
+			print(false, "Accepting new clients");
 			try {
 				while (this.isOpen && clients.size() < this.maxAllowedClients) {
-					onClientConnected(new SrvClientSocket(this.socket.accept()));
+					onClientConnected(new SrvClientSocket(this.socket.accept(), defaultPhase));
 				}
 			} catch (IOException ignored) {
 			}
 			this.acceptingClientsThread = null;
+			print(false, "Not accepting new clients");
 		});
 		acceptingClientsThread.start();
 	}
 
 	private void receiveCmd(String clientIdentifier, String fullReceivedMessage) {
+		System.err.println("SRV RECEIVED: "+clientIdentifier+": "+fullReceivedMessage);
+
 		int sep = fullReceivedMessage.indexOf(' ');
 		if (sep < 0) {
-			sep = fullReceivedMessage.length() - 1;
+			sep = fullReceivedMessage.length();
 		}
 
 		String params = fullReceivedMessage.substring(sep);
-		String cmdCode = fullReceivedMessage.substring(0, sep - 1);
+		String cmdCode = fullReceivedMessage.substring(0, sep);
 
-		String currPhase = this.clients.get(clientIdentifier).getRule(cmdCode);
-		this.receivers.get(cmdCode).get(currPhase).receive(clientIdentifier, params);
+		SrvClientSocket client = this.clients.get(clientIdentifier);
+
+		Map<String, IServerCmdReceiver> cmds = this.receivers.get(cmdCode);
+		if(cmds == null) {
+			print(false, "CMD "+cmdCode+" unknown from server");
+			return;
+		}
+
+		IServerCmdReceiver cmdReceiver = cmds.get(client.phase);
+		if(cmdReceiver == null) {
+			print(true,
+					"Client's phase "+client.phase+" does not allow to use command "+cmdCode+
+					(cmds.size()==0
+						?" (never allowed)"
+						:" (allowed for"+String.join(", ", cmds.keySet())+")")
+			);
+			return;
+		}
+
+		cmdReceiver.receive(clientIdentifier, params);
+	}
+
+	private static void print(boolean isError, Object text) {
+		if(!debugMode) {
+			return;
+		}
+		if(isError) {
+			System.err.println("[SERVER] "+text.toString());
+		} else {
+			System.out.println("[SERVER] "+text.toString());
+		}
 	}
 }

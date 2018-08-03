@@ -7,4 +7,8 @@ public class CltPongEmitter extends AClientCmdEmitter {
 	protected CltPongEmitter(Client client) {
 		super(client);
 	}
+
+	void send(String pingTime) {
+		this.send("PONG", pingTime);
+	}
 }

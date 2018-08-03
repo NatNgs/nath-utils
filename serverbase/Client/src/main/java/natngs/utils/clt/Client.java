@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Client {
-	private final Map<String /*cmdCode*/, Map<String /*rule*/, IClientCmdReceiver>> receivers = new HashMap<>();
-	private final Map<String /*CmdCode*/, String /*Rule*/> currentRights = new HashMap<>();
+	private final Map<String /*cmdCode*/, Map<String /*phase*/, IClientCmdReceiver>> receivers = new HashMap<>();
 
 	private Socket socket = null;
 	private BufferedReader in;
 	private OutputStreamWriter out;
 	private boolean isOpen = false;
+	private String currentPhase;
 
 	/**
 	 * Connect the client to a server on specified port.
@@ -59,17 +59,17 @@ public class Client {
 
 	/**
 	 * @param cmdCode  code of the command that starts every REST message calling to it
-	 * @param rule     identifier of the receiver to call, to differentiate receivers using the same cmdCode
-	 * @param receiver the receiver to be called when the command REST is received and rule is applied
-	 * @return receiver that was corresponding to cmdCode and rule before the change (null if it is a new cmdCode/rule)
+	 * @param phase    identifier of the receiver to call, to differentiate receivers using the same cmdCode
+	 * @param receiver the receiver to be called when the command REST is received and phase is applied
+	 * @return receiver that was corresponding to cmdCode and phase before the change (null if it is a new cmdCode/phase)
 	 * @see Client#unsetReceiver(String)
 	 * @see Client#unsetReceiver(String, String)
 	 */
-	public IClientCmdReceiver registerReceiver(String cmdCode, String rule, IClientCmdReceiver receiver) {
+	public IClientCmdReceiver registerReceiver(String cmdCode, String phase, IClientCmdReceiver receiver) {
 		if (!receivers.containsKey(cmdCode)) {
 			receivers.put(cmdCode, new HashMap<>());
 		}
-		return this.receivers.get(cmdCode).put(rule, receiver);
+		return this.receivers.get(cmdCode).put(phase, receiver);
 	}
 
 	/**
@@ -94,17 +94,11 @@ public class Client {
 		}
 	}
 
-
 	/**
-	 * @param cmdCode Command that change of rule
-	 * @param newRule new rule to follow, 'null' to remove the right
-	 * @return last active rule
+	 * @param newPhase new phase of this client
 	 */
-	public String setActiveRule(String cmdCode, String newRule) {
-		if (newRule == null) {
-			return this.currentRights.remove(cmdCode);
-		}
-		return this.currentRights.put(cmdCode, newRule);
+	public void setActivePhase(String newPhase) {
+		this.currentPhase = newPhase;
 	}
 
 	/**
@@ -137,6 +131,7 @@ public class Client {
 		return null;
 	}
 
+
 	/**
 	 * Send a message to the server
 	 */
@@ -149,19 +144,26 @@ public class Client {
 			}
 			out.write('\n');
 			out.flush();
-		} catch (IOException ignored) {
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			this.close();
 		}
 	}
 
 	private void receiveCmd(String fullReceivedMessage) {
+		System.err.println("CLT RECEIVED: " + fullReceivedMessage);
 		int sep = fullReceivedMessage.indexOf(' ');
 		if (sep < 0) {
-			sep = fullReceivedMessage.length() - 1;
+			sep = fullReceivedMessage.length();
 		}
 
 		String params = fullReceivedMessage.substring(sep);
-		String cmdCode = fullReceivedMessage.substring(0, sep - 1);
+		String cmdCode = fullReceivedMessage.substring(0, sep);
 
-		this.receivers.get(cmdCode).get(this.currentRights.get(cmdCode)).receive(params);
+		if (!this.receivers.containsKey(cmdCode)) {
+			System.err.println("CMD " + cmdCode + " unknown from client");
+		}
+
+		this.receivers.get(cmdCode).get(this.currentPhase).receive(params);
 	}
 }
