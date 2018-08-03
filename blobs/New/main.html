@@ -1,0 +1,74 @@
+<html>
+<head>
+	<meta charset="UTF-8"> 
+	<link rel="stylesheet" href="ssc.css">
+	<script src="actions.js"></script>
+	<script src="menu.js"></script>
+	<script src="setup.js"></script>
+</head>
+<body onLoad="init()">
+	<div>
+		Loading...
+	</div>
+	<div id="template-menu" hidden=hidden>
+		<table>
+			<tr>
+				<td colspan=2>
+					<button onClick="clickMenuLoad()">Load Game</button>
+					<hr>
+				</td>
+			</tr>
+			<tr>
+				<td>Cards in deck:</td>
+				<td><input id="deckSize" type="number" min="10" max="999" value="30"/></td>
+			</tr>
+			<tr>
+				<td>Human players:</td>
+				<td><input id="playersNumber" type="number" min="0" max="10" value="1"/></td>
+			</tr>
+			<tr>
+				<td>Computer players:</td>
+				<td><input id="iaNumber" type="number" min="0" max="10" value="1"/></td>
+			</tr>
+			<tr>
+				<td>Board size:</td>
+				<td><input id="boardSize" type="number" min="2" max="10" value="3"/></td>
+			</tr>
+			<tr>
+				<td colspan=2>
+					<button id="newGame">New Game</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<div id="template-setup" hidden=hidden>
+		<table>
+			<tr>
+				<td colspan=2>
+					<button onClick="clickSetupLaunch()">Launch Game</button>
+					<button onClick="clickBackToMenu()">Return to menu</button>
+					<hr>
+				</td>
+			</tr>
+			<tr>
+				<td id="players"></td>
+			</tr>
+		</table>
+	</div>
+	
+	<div id="template-game" hidden=hidden>
+		NOT YET DONE !<br/>
+		<button onClick="clickBackToMenu()">Return to menu</button>
+	</div>
+
+	<div id="template-playersetup" hidden=hidden>
+		<div class="card">
+			<span>Name: <input id="$p-name" value="Unnamed"/></span><br/>
+			<button id="$p-load">Load Deck</button><br/>
+			<button id="$p-save">Save Deck</button><br/>
+			<button id="$p-edit">Edit Deck</button>
+		</div>
+	</div>
+</body>
+</html>
