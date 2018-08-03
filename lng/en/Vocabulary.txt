@@ -1,0 +1,48 @@
+How to pronounce alphabet letters to spell words:
+
+A > xa     À > xà
+E > xe     È > xè
+I > xi     Ì > xì
+O > xo     Ò > xò
+U > xu     Ù > xù
+S > se     Z > za
+K > ke     G > ga
+T > te     D > da
+M > me     N > na
+P > pe     B > ba
+X > exe    H > ha       (x > exe to avoid ambiguity with e > xe)
+C > ce     J > ja
+F > fe     V > va
+R > re     L > la
+
+
+
+
+Following words are kept in english (waiting for translation)
+--------------------------------------------------------------
+Structure:
+Test:
+Description:
+Speed:
+
+Following words are partially translated
+-----------------------------------------
+and/or: or
+or: xor
+and: and
+
+
+Following words are translated
+------------------------------
+<Nth>: Nth
+<Passive>: Pa
+<Active>: Ka
+<Negative>: Nò
+<Imperative>: Mi
+<Conditional>: Ki
+<Past>: Sù
+<Future>: Fù
+<ProgressivePast>: Zù
+<ProgressiveFuture>: Vù
+<group-begin>: Ma
+<group-end>: Ne

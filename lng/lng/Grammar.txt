@@ -1,0 +1,112 @@
+################################
+###   Structure test nth-1   ###
+################################
+
+Sentence:
+-------------------
+
+Composition-Pa of and Verb Group and-Ne.
+Note that verbs can be nouns, adjectives (passive mode), or verbs.
+Note also that groups are typically sub-sentences used like verbs.
+
+
+
+Groups and Particles with arguments:
+-------------------
+
+Group: (can be used as enumeration)
+  <group-begin> + Verb/Group + Verb/Group + ... + <group-begin> + <group-end> 
+
+Particles with arguments:  (Like a group, but replacing <group-begin> with the particle)
+  Particle + Verb/Group + Verb/Group + ... + Particle + <group-end>
+
+
+Particle are for example:
+of, according to, during, from, to, while, ...
+
+
+(Cat; food + active; while + (Mouse; food + passive) + while + end)
+Cat is eating while Mouse is being eaten.
+
+Can be used without argument to implicit that last sentence is the argument.
+(Mouse; food + passive). (Cat; food + active; while).
+Mouse is being eaten. Cat is eating while (that was said in last sentence).
+
+Example with more than 1 argument:
+There is a dog, a big cat and a mouse.
+(And; (dog, <group-begin> + (Cat; big) + <group-begin> + <group-end>, mouse) + And + <group-end>).
+
+
+Sentences:
+-------------------
+
+(Description; 1; Short; of (Property; All)      ; change + passive + imperative + future; during (Installation; Process; The)        ; list + passive; below)
+A Short Description of (All properties) witch must be changed during (the installation process) is listed below.
+^                                             ^^^^^^^^^^^^^^^         ^^^                       ^^^^^^^^^
+1                                      imperative passive future     unique                     passive
+
+
+Verbs:
+-------------------
+
+1- Noun
+Example with Subject: Cat, Action: Eat
+
+2- Relativity
+Nominative: 'Food'		> No particle
+Active: 'to Eat'		> -Ka
+Passive: 'to be Eaten'	> -Pa
+
+3- Mode
+Affirmative: Cat eat		> No particle
+Negative: Cat do not eat	> -Nò
+Imperative: Cat should eat	> -Mi
+Conditional: Cat may eat	> -Ki
+
+--Can be combinated:
+ Negative + Imperative:		Cat (should not) eat	> -Nòmi
+ Negative + Conditional:	Cat (may not) eat		> -Nòki
+ Imperative + Negative:		Cat should (not eat)	> -Minò
+ Conditional + Negative:		Cat may (not eat)	> -Kinò
+ Conditional + Imperative:	Cat may have to eat		> -Kimi
+ Negative + Imperative + Negative:		Cat should not not eat		> -Nòminò
+ Negative + Conditional + Negative:		Cat may not not eat			> -Nòkinò
+ Negative + Conditional + Imperative:	Cat may have to (not eat)	> -Nòkimi
+ Conditional + Negative + Imperative:	Cat may not (have to eat)	> -Kinòmi
+ Conditional + Imperative + Negative:	Cat may (not have to eat)	> -Kiminò
+ Negative + Conditional + Imperative + Negative:	Cat may (not have to (not eat))	> -Nòkiminò
+ Conditional + Negative + Imperative + Negative:	Cat may not (not have to eat)	> -Kinòminò
+ Negative + Conditional + Negative + Imperative:	Cat may not (have to (not eat))	> -Nòkinòmi
+ Negative + Conditional + Negative + Imperative + Negative:	Cat may not (not have to (not eat))	> -Nòkinòminò
+--
+
+4- Tempse
+None/General: Cat eat	> No particle
+Past: Cat was eating	> -Sù
+Future: Cat will eat	> -Fù
+Past progressive: <not in english>		> -Zù  		(has started in the past, is finishing now or in the future (no information))
+Present Progressive: Cat is eating		> -Zùvù		(has started in the past, and will finish in the future)
+Future progressive: <not in english>	> -Vù		(will finish in the future, is beginning or has begun in the past (no information))
+
+Tempses are combinable. First tempse used is stronger, last is weak.
+Past + Future (Future in the past): Cat was going to eat	> -Sùfù
+Future + Past (Past in the furute): Cat will have eaten		> -Fùsù
+Past + Past (Past in the past): Cat had eaten				> -Sùsù
+Past + Present Progressive: The cat was eating				> -Sùzùvù
+Past + Future + Past (Before future in the past): The cat was going to have eaten	> -Sùfùsù
+Past + Future + Future Progressive: The cat was going to be eating					> -Sùfùzù
+Past + Future + Past Progressive: The cat was going to end to be eating				> -Sùfùvù
+...
+
+Past+Past+Past > Past+Past > Past+Past+Future ># Past #
+ # Past #> Past+Future+Past > Past+Future > Past+Future+Future >## Present ##
+  ## Present ##> Future+Past+Past > Future+Past > Future+Past+Future ># Future #
+    # Future #> Future+Future+Past > Future+Future > Future+Future+Future
+	
+	
+	
+How to count things:
+---------------------
+
+There is 42 cats.	(Cat; 42; Be + Passive)
+This is the 42th cat.	(Cat; <nth> + 42; Be + Passive)
