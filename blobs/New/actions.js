@@ -21,7 +21,3 @@ function init() {
 	run = new Run();
 	run.menu.load()
 }
-
-function clickBackToMenu() {
-	run.loadMenu()
-}

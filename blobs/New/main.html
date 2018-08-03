@@ -14,7 +14,7 @@
 		<table>
 			<tr>
 				<td colspan=2>
-					<button onClick="clickMenuLoad()">Load Game</button>
+					<button id="load">Load Game</button>
 					<hr>
 				</td>
 			</tr>
@@ -31,6 +31,10 @@
 				<td><input id="iaNumber" type="number" min="0" max="10" value="1"/></td>
 			</tr>
 			<tr>
+				<td>Hand size:</td>
+				<td><input id="handSize" type="number" min="2" max="10" value="5"/></td>
+			</tr>
+			<tr>
 				<td>Board size:</td>
 				<td><input id="boardSize" type="number" min="2" max="10" value="3"/></td>
 			</tr>
@@ -45,10 +49,16 @@
 	<div id="template-setup" hidden=hidden>
 		<table>
 			<tr>
-				<td colspan=2>
-					<button onClick="clickSetupLaunch()">Launch Game</button>
-					<button onClick="clickBackToMenu()">Return to menu</button>
+				<td>
+					<button id="launch">Launch Game</button>
+					<button id="returnToMenu">Return to menu</button>
 					<hr>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span id="playersNumber">?</span> players (<span id="humansNumber">?</span> humans, <span id="computersNumber">?</span> computers).<br/>
+					<span id="deckNumber">?</span> cards in the deck at the beginning, <span id="boardNumber">?</span> cards on the board and <span id="handNumber">?</span> cards in the hand, for each player.
 				</td>
 			</tr>
 			<tr>

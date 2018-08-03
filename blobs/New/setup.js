@@ -3,7 +3,16 @@ function Setup(run, templates) {
 	
 	this.load = function(params) {
 		document.body.innerHTML = templates.page
-		let [d,p,i,b] = params
+		let [d,p,i,b,h] = params
+		
+		document.getElementById("playersNumber").innerHTML = p+i
+		document.getElementById("humansNumber").innerHTML = p
+		document.getElementById("computersNumber").innerHTML = i
+		document.getElementById("deckNumber").innerHTML = d
+		document.getElementById("boardNumber").innerHTML = b
+		document.getElementById("handNumber").innerHTML = h
+		document.getElementById("returnToMenu").onclick = run.menu.load
+		document.getElementById("launch").onclick = () => { alert("Not yet available") };
 		
 		const playersDiv = document.getElementById("players")
 		buildPlayers(playersDiv, p, i)

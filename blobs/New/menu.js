@@ -3,6 +3,7 @@ function Menu(run, template) {
 		document.body.innerHTML = template
 		
 		document.getElementById("newGame").onclick = this.newGame
+		document.getElementById("load").onclick = () => { alert("Not yet available") };
 	}
 
 	const validateNewGameParams = function() {
@@ -10,11 +11,13 @@ function Menu(run, template) {
 		const ep = document.getElementById("playersNumber")
 		const ei = document.getElementById("iaNumber")
 		const eb = document.getElementById("boardSize")
+		const eh = document.getElementById("handSize")
 		
-		const d = ed.value
-		const p = ep.value
-		const i = ei.value
-		const b = eb.value
+		const d = - -ed.value
+		const p = - -ep.value
+		const i = - -ei.value
+		const b = - -eb.value
+		const h = - -eh.value
 		
 		// remove class "error" from ed, ep, ei and eb
 		
@@ -31,8 +34,12 @@ function Menu(run, template) {
 			// set class "error" on eb
 			err = true;
 		}
+		if(h < b) {
+			// set class "error" on eh
+			err = true;
+		}
 		
-		return !err && [d,p,i,b]
+		return !err && [d,p,i,b,h]
 	}
 
 	this.newGame = function() {
