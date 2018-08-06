@@ -3,13 +3,17 @@ function Run() {
 		menu: document.getElementById("template-menu").innerHTML,
 		setup: {
 			page: document.getElementById("template-setup").innerHTML,
-			player: document.getElementById("template-playersetup").innerHTML
+			player: document.getElementById("template-playersetup").innerHTML,
+			card: document.getElementById("template-card").innerHTML
 		},
-		game: document.getElementById("template-game").innerHTML
+		game: {
+			page: document.getElementById("template-game").innerHTML,
+			card: document.getElementById("template-card").innerHTML
+		}
 	};
 	this.menu = new Menu(this, templates.menu)
 	this.setup = new Setup(this, templates.setup)
-	//this.game = new Game(templates.game)
+	this.game = new Game(this, templates.game)
 }
 
 let initiated = false;
