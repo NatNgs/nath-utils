@@ -31,7 +31,7 @@ function Game(run, templates) {
 	const getCardDiv = function(card, template) {
 		//let div = document.getElementById(card.id) || document.createElement('div')
 
-		let cts = "</td></tr>"
+		let cts = "-->"
 		for(let i=((ctsNames.length/2)|0) -1; i>=0; i--) {
 			cts = `${cts}
 <tr class="cts">
@@ -51,14 +51,13 @@ function Game(run, templates) {
 		console.log(template)
 
 		/*div.innerHTML =*/ return template
-							.replace(/\$base/gi, card.base)
+							.replace(/\$bas/gi, card.base)
 							.replace(/\$cid/gi, card.id)
-							.replace(/\$cts/gi, cts+"<tr><td>")
-							.replace(/\$curr/gi, (card.pts/100)|0)
-							.replace(/\$effect/gi, card.effect.toString())
+							.replace(/\$cts/gi, cts+"<!--")
+							.replace(/\$eff/gi, card.effect.toString())
 							.replace(/\$gms/gi, card.parties)
-							.replace(/\$name/gi, card.name)
-							.replace(/\$pts/gi, (card.totalPts/(100*card.parties||1))|0)
+							.replace(/\$nam/gi, card.name)
+							.replace(/\$lvl/gi, card.getLvl())
 		//return div;
 	}
 

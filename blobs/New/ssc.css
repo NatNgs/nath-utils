@@ -11,3 +11,12 @@
 .paramerr {
 	background-color: #FFAAAA;
 }
+
+.blob table, .blob th, .blob td {
+	border: 1px solid #ccc;
+	border-radius: 1px;
+	text-align: center;
+	border-collapse: collapse;
+	margin: 3px;
+	background-color: #FFF;
+}

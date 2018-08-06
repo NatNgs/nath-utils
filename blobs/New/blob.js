@@ -21,7 +21,7 @@ let cardNumber = 0
 function Card() {
 	this.nb = ++cardNumber // 1 to +inf
 	this.id = "card"+cardNumber
-	this.name = "Card#"+cardNumber
+	this.name = nameGen(cardNumber)
 	allCards[allCards.length] = this
 
 	this.pts = 0
@@ -53,6 +53,10 @@ function Card() {
 
 		return points
 	};
+	
+	this.getLvl = function() {
+		return (Math.random()*10)|0
+	}
 
 	this.toString = function() {
 		return "{"+this.name+"}"
@@ -210,5 +214,19 @@ function BattleTurn() {
 
 		return str + "]";
 	}
+}
+
+function nameGen(number) {
+	const v = ['a', 'i', 'ü', 'é', 'o', 'ou', 'oxo', 'on', 'oho' , 'y']
+	const c = ['b', 'l', 'k', 'p', 'r', 't',  'd', 'f', 'ch', 'kr']
+	
+	Math.random()
+	
+	number *= number * 31
+	if(number == 0)
+		return "Blob"
+
+	let str = (''+number).split('').reverse().map((x,y)=> (y%2?c:v)[x])
+	return "Blob" + str.join('');
 }
 
