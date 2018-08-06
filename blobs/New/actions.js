@@ -3,8 +3,7 @@ function Run() {
 		menu: document.getElementById("template-menu").innerHTML,
 		setup: {
 			page: document.getElementById("template-setup").innerHTML,
-			player: document.getElementById("template-playersetup").innerHTML,
-			card: document.getElementById("template-card").innerHTML
+			player: document.getElementById("template-playersetup").innerHTML
 		},
 		game: {
 			page: document.getElementById("template-game").innerHTML,

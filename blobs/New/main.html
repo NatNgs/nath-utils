@@ -1,6 +1,6 @@
 <html>
 <head>
-	<meta charset="UTF-8"> 
+	<meta charset="UTF-8">
 	<link rel="stylesheet" href="ssc.css">
 	<script src="actions.js"></script>
 	<script src="menu.js"></script>
@@ -47,7 +47,7 @@
 			</tr>
 		</table>
 	</div>
-	
+
 	<div id="template-setup" hidden=hidden>
 		<table>
 			<tr>
@@ -68,10 +68,11 @@
 			</tr>
 		</table>
 	</div>
-	
+
 	<div id="template-game" hidden=hidden>
-		NOT YET DONE !<br/>
 		<button id="returnToSetup">Abort game</button>
+		<hr />
+		<div id="tmp-allcards">(null)</div>
 	</div>
 
 	<div id="template-playersetup" hidden=hidden>
@@ -82,9 +83,9 @@
 			<button id="$p-edit">Edit Deck</button>
 		</div>
 	</div>
-	
+
 	<div id="template-card" hidden=hidden>
-		<table id="$c" class="card">
+		<table id="$cid" class="card">
 			<tr>
 				<th colspan="2">$name</th>
 			</tr>
@@ -95,12 +96,11 @@
 					<p class="currPts">$curr</p>
 				</td>
 			</tr>
-			$cts
+			<tr><td>$cts</td></tr>
 			<tr class="effect">
 				<td colspan="2">$effect</td>
 			</tr>
 		</table>
 	</div>
-	
 </body>
 </html>

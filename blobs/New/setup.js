@@ -5,8 +5,9 @@ function Setup(run, templates) {
 	this.setParams = function(params) {
 		[d,p,i,b,h] = params
 		buildPlayers(p, i)
+		addRandomCards(d)
 	}
-	
+
 	this.load = function(params) {
 		document.body.innerHTML = templates.page
 		document.getElementById("returnToMenu").onclick = () => { run.menu.load() }
@@ -25,20 +26,20 @@ function Setup(run, templates) {
 
 	const buildPlayers = function(human, pc) {
 		this.players = [] // Reset
-		
+
 		while(--human >= 0)
 			this.players[this.players.length] = new Team("phuman"+human, "Human")
 
 		while(--pc >= 0)
 			this.players[this.players.length] = new Team("pauto"+pc, "Bot")
 	}
-	
+
 	const buildPlayersDiv = function(div, template) {
 		for(let p of this.players) {
 			let html = document.createElement("span")
 			html.innerHTML = template.replace(/\$p/gi, p.id)
 			div.appendChild(html)
-			
+
 			let divName = document.getElementById(p.id+"-name")
 			divName.value = p.name
 			divName.onchange = () => { p.name = divName.value }
@@ -51,7 +52,7 @@ function Setup(run, templates) {
 	const addRandomCards = function(number) {
 		while(--number >= 0)
 			for(let p of this.players)
-				p.team.addCard(new Card())
+				p.addCard(new Card())
 	}
 
 	const launch = function() {
@@ -65,6 +66,6 @@ function Setup(run, templates) {
 
 	const validateBeforeLaunch = function() {
 		// TODO check for errors, returning false if errors found
-		return this.players.map(p=>{p.team})
+		return this.players
 	}
 }

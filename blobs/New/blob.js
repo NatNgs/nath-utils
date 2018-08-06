@@ -18,23 +18,23 @@ for(let i=effectsTarget.length-1; i>=0; i--)
 const allCards = []
 let cardNumber = 0
 
-function Card(template) {
+function Card() {
 	this.nb = ++cardNumber // 1 to +inf
 	this.id = "card"+cardNumber
 	this.name = "Card#"+cardNumber
 	allCards[allCards.length] = this
-	
+
 	this.pts = 0
 	this.totalPts = 0
 	this.parties = 0
-	
+
 	this.cts = new Array(ctsNames.length)
 	for(let i=0; i<ctsNames.length; i++)
 		this.cts[i] = (Math.random()*10-4) |0 // -4 to 6
-	
+
 	this.base = (Math.random()*89+10) |0 // 10 to 99
 	this.effect = new Effect()
-	
+
 	// return int
 	this.getPoints = function(teamEffects /* tab[ctsIndex] = coef*/) {
 		switch(this.effect.target) {
@@ -45,49 +45,17 @@ function Card(template) {
 			case targetIndex[TARG_ALIE]: // cancel self effect if effect on others
 				teamEffects[this.effect.cts] -= this.effect.power
 		}
-		
+
 		// apply effects and sum points
 		let points = this.base
 		for(let i=teamEffects.length-1; i>=0; i--)
 			points += teamEffects[i] * this.cts[i]
-		
+
 		return points
 	};
 
 	this.toString = function() {
 		return "{"+this.name+"}"
-	}
-
-	this.getDiv = function() {
-		let div = document.getElementById(this.id) || document.createElement('div')
-		
-		let cts = ""
-		for(let i=((ctsNames.length/2)|0) -1; i>=0; i--) {
-			cts = `${cts}
-<tr class="cts">
-	<td>${ctsNames[i*2]}: ${this.cts[i*2]}</td>
-	<td>${ctsNames[i*2+1]}: ${this.cts[i*2+1]}</td>
-</tr>`;
-		}
-		
-		if(ctsNames.length%2 > 0) {
-			cts = `${cts}
-<tr class="cts">
-	<td>${ctsNames[ctsNames.length]}: ${this.cts[this.cts.length]}</td>
-	<td><hr /></td>
-</tr>`;
-		}
-		
-		div.innerHTML = template
-							.replace(/\$c/gi, this.id)
-							.replace(/\$name/gi, this.name)
-							.replace(/\$base/gi, this.base)
-							.replace(/\$pts/gi, (this.totalPts/(100*this.parties||1))|0)
-							.replace(/\$gms/gi, this.parties)
-							.replace(/\$curr/gi, (this.pts/100)|0)
-							.replace(/\$effect/gi, this.effect.toString())
-							.replace(/\$cts/gi, cts)
-		return div;
 	}
 }
 
@@ -95,13 +63,13 @@ function Effect() {
 	this.target = (Math.random()*effectsTarget.length)|0
 	this.power = effectsPowers[(Math.random()*effectsPowers.length)|0]
 	this.cts = (Math.random()*ctsNames.length)|0
-	
+
 	this.toString = function() {
 		return this.power===0
 			?"+0"
 			:(this.power>0
 				?("+"+this.power)
-				:this.power) 
+				:this.power)
 			+" on "+effectsTarget[this.target]+"'s "+ctsNames[this.cts]
 	}
 }
@@ -111,9 +79,9 @@ function Team(id, name) {
 	this.id = id || null
 	this.name = name || null
 	this.cards = []
-	
+
 	this.addCard = function(card) {this.cards[this.cards.length] = card}
-	
+
 	// return tab[ctsIndex][targetIndex] = int
 	this.getCoefs = function() {
 		// init coefs>0
@@ -125,13 +93,13 @@ function Team(id, name) {
 
 			coefs[i] = ctgt;
 		}
-		
+
 		// fill coefs
 		for(let cn=this.cards.length-1; cn>=0; cn--) {
 			const effect = this.cards[cn].effect;
 			coefs[effect.cts][effect.target] += effect.power;
 		}
-		return coefs; 
+		return coefs;
 	};
 
 	// return tab[cardIndex] = points
@@ -142,7 +110,7 @@ function Team(id, name) {
 
 		return points;
 	};
-	
+
 	this.getScore = function(teamEffects /* tab[ctsIndex] = coef*/) {
 		let points = 0;
 		for(let i=this.cards.length-1; i>=0; i--)
@@ -155,9 +123,9 @@ function Team(id, name) {
 		var str = "\t[";
 		for(let i=0; i<this.cards.length; i++)
 			str+=this.cards[i].toString()+", ";
-		
+
 		return str + "]";
-	}	
+	}
 
 	// return boolean
 	this.hasSameCard = function(team2) {
@@ -171,9 +139,9 @@ function Team(id, name) {
 
 function BattleTurn() {
 	this.teams = [];
-	
+
 	this.addTeam = function(team){this.teams[this.teams.length] = team;}
-	
+
 	// return tab[teamIndex][ctsIndex] = coef
 	this.getTeamCoefs = function() {
 		// init coefs>0
@@ -185,7 +153,7 @@ function BattleTurn() {
 
 			coefs[tn] = teamCoefs;
 		}
-		
+
 		// compute teams coefs
 		for(let tn=0; tn<this.teams.length; tn++) {
 			const cTeam = this.teams[tn].getCoefs(); // return tab[ctsIndex][targetIndex] = int
@@ -193,14 +161,14 @@ function BattleTurn() {
 			for(let ctsi=ctsNames.length-1; ctsi>=0; ctsi--) {
 				const cTeami = cTeam.pop(); // cTeam[ctsi]
 
-				const allValue = cTeami[targetIndex[TARG_ALL]] 
+				const allValue = cTeami[targetIndex[TARG_ALL]]
 					           + cTeami[targetIndex[TARG_OTHR]];
 
 				// compute & apply team tn coefs
 				coefs[tn][ctsi] += allValue
-					+ cTeami[targetIndex[TARG_TEAM]] 
+					+ cTeami[targetIndex[TARG_TEAM]]
 					+ cTeami[targetIndex[TARG_ALIE]];
-				
+
 				// compute others teams coefs
 				const foeValue = allValue
 					+ cTeami[targetIndex[TARG_FOES]];
@@ -216,15 +184,15 @@ function BattleTurn() {
 	// return tab[teamIndex][cardIndex] = points
 	this.fight = function() {
 		const teamCoefs = this.getTeamCoefs(); // tab[teamIndex][ctsIndex] = coef
-		
+
 		// compute points for each card
 		const points = [];
 		for(let i=0; i<this.teams.length; i++)
 			points[i] = this.teams[i].getScore(teamCoefs[i]);
-		
+
 		return points; // tab[teamIndex] = points
 	};
-	
+
 	// return boolean
 	this.isOk = function() {
 		for(let t1=0; t1<this.teams.length-1; t1++)
@@ -234,12 +202,12 @@ function BattleTurn() {
 
 		return true;
 	}
-	
+
 	this.toString = function(){
 		var str = "[\n";
 		for(let i=0; i<this.teams.length; i++)
 			str+=this.teams[i].toString()+"\n";
-		
+
 		return str + "]";
 	}
 }
