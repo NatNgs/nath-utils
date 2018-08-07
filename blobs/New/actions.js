@@ -7,7 +7,8 @@ function Run() {
 		},
 		game: {
 			page: document.getElementById("template-game").innerHTML,
-			card: document.getElementById("template-card").innerHTML
+			card: document.getElementById("template-card").innerHTML,
+			board: document.getElementById("template-board").innerHTML
 		}
 	};
 	this.menu = new Menu(this, templates.menu)

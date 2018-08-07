@@ -9,9 +9,8 @@
 	<script src="game.js"></script>
 </head>
 <body onLoad="init()">
-	<div>
-		Loading...
-	</div>
+	<div>Loading...</div>
+
 	<div id="template-menu" hidden=hidden>
 		<table>
 			<tr>
@@ -72,7 +71,14 @@
 	<div id="template-game" hidden=hidden>
 		<button id="returnToSetup">Abort game</button>
 		<hr />
-		<div id="tmp-allcards">(null)</div>
+		<div><!-- curr pyr actions -->
+			<div id="pname">(null)</div>
+			<div class="card deck">(null)</div>
+			<span id="phand">(null)</span>
+			<div class="card deadzone">(null)</div>
+		</div>
+		<hr />
+		<div id="tmp-allcards">(null)</div> <!-- curr board all pyrs -->
 	</div>
 
 	<div id="template-playersetup" hidden=hidden>
@@ -99,5 +105,18 @@
 			</tr>
 		</table>
 	</div>
+
+	<div id="template-board" hidden=hidden>
+		<table>
+			<tr><td id="$b-nam" colspan=3>(null)</td></tr>
+			<tr>
+				<td>Rank: <span id="$b-rnk">(null)</span></td>
+				<td>Pts: <span id="$b-pts">(null)</span></td>
+				<td>Remaining: <span id="$b-rmn">(null)</span>/<span id="$b-ttl">(null)</span></td>
+			</tr>
+			<tr><td id="$b-crd" colspan=3>(null)</td></tr>
+		</table>
+	</div>
+
 </body>
 </html>

@@ -10,7 +10,6 @@ function Game(run, templates) {
 
 		let printAllCards = ""
 		for(let t of teams) {
-			console.log(t)
 			for(let c of t.cards) {
 				let a = getCardDiv(c, templates.card)
 
@@ -22,6 +21,21 @@ function Game(run, templates) {
 		}
 
 		document.getElementById("tmp-allcards").innerHTML = printAllCards;
+		
+		for(let t of teams) {
+			for(let c of t.cards) {
+				const a = document.getElementById(c.id)
+				console.log(a.classList)
+				a.onclick = () => { 
+					if (a.classList.contains("selected")) 
+						a.classList.remove("selected");
+					else
+						a.classList.add("selected");
+				}
+			}
+
+			printAllCards += "<hr/>"
+		}
 
 
 		console.log("LOADED GAME")
@@ -48,16 +62,17 @@ function Game(run, templates) {
 </tr>`;
 		}
 
-		console.log(template)
+		cts += "<!--"
 
-		/*div.innerHTML =*/ return template
-							.replace(/\$bas/gi, card.base)
-							.replace(/\$cid/gi, card.id)
-							.replace(/\$cts/gi, cts+"<!--")
-							.replace(/\$eff/gi, card.effect.toString())
-							.replace(/\$gms/gi, card.parties)
-							.replace(/\$nam/gi, card.name)
-							.replace(/\$lvl/gi, card.getLvl())
+		/*div.innerHTML =*/
+		return template.replace(/\$bas/g, card.base)
+					.replace(/\$cid/g, card.id)
+					.replace(/\$cts/g, cts)
+					.replace(/\$eff/g, card.effect.toString())
+					.replace(/\$gms/g, card.parties)
+					.replace(/\$nam/g, card.name)
+					.replace(/\$lvl/g, card.getLvl())
+		
 		//return div;
 	}
 
