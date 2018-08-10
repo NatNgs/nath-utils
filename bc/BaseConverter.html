@@ -31,8 +31,9 @@
 				<input id="fromS" disabled=true value="10">
 				<br/>
 				<button id="autoFrom" disabled=true onClick="autoAreaFrom()">Auto Fill</button>
-				<button id="shuffleFrom" onClick="shuffleAlphabetFrom()">Shuffle</button>
-				<button id="sortFrom" onClick="sortAlphabetFrom()">Sort</button>
+				<button id="shuffleFrom" onClick="setAlphabetFrom('shuffle')">Shuffle</button>
+				<button id="sortFrom" onClick="setAlphabetFrom('sort')">Sort</button>
+				<button id="asciiFrom" onClick="setAlphabetFrom('ascii')">ASCII</button>
 			</td>
 			<td align=center>
 				<span class="textBase">Alphabet:</span>
@@ -41,8 +42,9 @@
 				<input id="toS" disabled=true value="16">
 				<br/>
 				<button id="copyFromInTo" onClick="copyAlphabetFrominTo()">Import Alphabet From</button>
-				<button id="shuffleTo" onClick="shuffleAlphabetTo()">Shuffle</button>
-				<button id="sortTo" onClick="sortAlphabetTo()">Sort</button>
+				<button id="shuffleTo" onClick="setAlphabetTo('shuffle')">Shuffle</button>
+				<button id="sortTo" onClick="setAlphabetTo('sort')">Sort</button>
+				<button id="asciiTo" onClick="setAlphabetTo('ascii')">ASCII</button>
 			</td>
 		</tr>
 		<tr>
@@ -61,11 +63,17 @@
 			</td>
 		</tr>
 	</tbody></table>
-	<div class="copyright">Converter fully developed by Nathaël Noguès, October 2015.</div>
+	<div class="copyright">Converter fully developed by Nathaël Noguès, since October 2015.</div>
 	<table class="versions">
 		<tr><td>Ver.</td>
 			<td>Date</td>
 			<td>Description</td>
+		</tr>		
+		<tr><td>1.4</td>
+			<td>August 2018</td>
+			<td>
+				Added buttons to set source and destination alphabet to all printable ASCII characters<br/>
+			</td>
 		</tr>
 		<tr><td>1.3</td>
 			<td>July 2018</td>

@@ -9,12 +9,17 @@ function init() {
 	_BaseTo = document.getElementById("toS")
 	_StartButton = document.getElementById("start")
 	_StatusBar = document.getElementById("compress")
-	_AutoButton = document.getElementById("autoFrom")
 	_AreaEncoded = document.getElementById("AreaEncoded")
-	_ShuffleFrom = document.getElementById("shuffleFrom")
-	_ShuffleTo = document.getElementById("shuffleTo")
+	_AutoButton = document.getElementById("autoFrom")
 	_decodeBtn = document.getElementById("decode")
 	_encodeBtn = document.getElementById("encode")
+	_AsciiFrom = document.getElementById("asciiFrom")
+	_AsciiTo = document.getElementById("asciiTo")
+	_ShuffleFrom = document.getElementById("shuffleFrom")
+	_ShuffleTo = document.getElementById("shuffleTo")
+	_SortFrom = document.getElementById("sortFrom")
+	_SortTo = document.getElementById("sortTo")
+	
 	checkInputs()
 }
 
@@ -24,6 +29,7 @@ const cleanInput = (x)=>x.replace(/\n\r?/g,'␤')
 
 function onError(errorMessage) {
 	_StartButton.disabled = _ShuffleFrom.disabled = _ShuffleTo.disabled = true
+	_SortFrom.disabled = _SortTo.disabled = true
 
 	_StatusBar.value = errorMessage
 	_StatusBar.classList.add("statusErr")
@@ -31,6 +37,7 @@ function onError(errorMessage) {
 }
 function noMoreError() {
 	_StartButton.disabled = _ShuffleFrom.disabled = _ShuffleTo.disabled = false
+	_SortFrom.disabled = _SortTo.disabled = false
 	
 	_StatusBar.value = "Ready to convert"
 	_StatusBar.classList.remove("statusErr")
@@ -169,20 +176,30 @@ const strSuffhle = (s)=>{
     return a.join("")
 }
 
-function shuffleAlphabetFrom() {
-	_AlphabetFrom.value = strSuffhle(_AlphabetFrom.value)
-}
+const alphaAscii = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
-function shuffleAlphabetTo() {
-	_AlphabetTo.value = strSuffhle(_AlphabetTo.value)
+function setAlphabetFrom(typeOfSet) {
+	setAlphabet(_AlphabetFrom, typeOfSet)
 }
-
-function sortAlphabetFrom() {
-	_AlphabetFrom.value = _AlphabetFrom.value.split("").sort().join("")
+function setAlphabetTo(typeOfSet) {
+	setAlphabet(_AlphabetTo, typeOfSet)
 }
-
-function sortAlphabetTo() {
-	_AlphabetTo.value = _AlphabetTo.value.split("").sort().join("")
+function setAlphabet(input, typeOfSet) {
+	switch (typeOfSet) {
+		case 'shuffle':
+			input.value = strSuffhle(input.value)
+			break;
+		case 'sort':
+			input.value = input.value.split("").sort().join("")
+			break;
+		case 'ascii':
+			input.value = alphaAscii
+			break;
+		default:
+			console.log('Not defined "'+typeOfSet+'"')
+			return
+	}
+	checkInputsAsync()
 }
 
 function copyAlphabetFrominTo() {
