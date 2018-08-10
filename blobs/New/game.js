@@ -161,6 +161,7 @@ function Battle(rules, templates) {
 		// Remove dead cards
 		sortedCards.sort((a,b)=>(a.pts-b.pts)) // min first, max last
 		let deadLimit = sortedCards[players.length-1].pts
+		console.log(deadLimit, JSON.stringify(sortedCards, null, " ")+"")
 		const deadCards = sortedCards.filter(a=>(a.pts<=deadLimit))
 		for(let d of deadCards) {
 			let p = players[d.pid]
@@ -178,7 +179,9 @@ function Battle(rules, templates) {
 
 	const getCardAsHtml = function(card, template, id) {
 		let cts = "-->"
-		for(let i=((ctsNames.length/2)|0) -1; i>=0; i--) {
+		
+		let max = (ctsNames.length/2)|0
+		for(let i=0; i<max; i++) {
 			cts = `${cts}
 <tr class="cts">
 	<td>${ctsNames[i*2]}: ${card.cts[i*2]}</td>

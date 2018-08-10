@@ -26,9 +26,9 @@ function Card() {
 
 	this.cts = new Array(ctsNames.length)
 	for(let i=0; i<ctsNames.length; i++)
-		this.cts[i] = (Math.random()*10-4) |0 // -4 to 6
+		this.cts[i] = (Math.random()*14-5) |0 // -5 to 9
 
-	this.base = (Math.random()*89+10) |0 // 10 to 99
+	this.base = (Math.random()*39+10) |0 // 10 to 49
 	this.effect = new Effect()
 
 	// return int
