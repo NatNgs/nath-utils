@@ -169,11 +169,10 @@ function nameGen(number) {
 	const v = ['a', 'i', 'ü', 'é', 'o', 'ou', 'oxo', 'on', 'oho' , 'y']
 	const c = ['b', 'l', 'k', 'p', 'r', 't',  'd', 'f', 'ch', 'kr']
 	
-	Math.random()
-	
-	number *= number * 31
 	if(number == 0)
 		return "Blob"
+
+	number *= number * 31
 
 	let str = (''+number).split('').reverse().map((x,y)=> (y%2?c:v)[x])
 	return "Blob" + str.join('');
