@@ -30,8 +30,10 @@ function Setup(run, templates) {
 		while(--human >= 0)
 			this.players[this.players.length] = new Team("phuman"+human, "Human")
 
-		while(--pc >= 0)
+		while(--pc >= 0) {
 			this.players[this.players.length] = new Team("pauto"+pc, "Bot")
+			this.players[this.players.length-1].isAi = true
+		}
 	}
 
 	const buildPlayersDiv = function(div, template) {
@@ -52,7 +54,7 @@ function Setup(run, templates) {
 	const addRandomCards = function(number) {
 		while(--number >= 0)
 			for(let p of this.players)
-				p.addCard(new Card())
+				p.cards[p.cards.length] = new Card()
 	}
 
 	const launch = function() {
@@ -66,6 +68,6 @@ function Setup(run, templates) {
 
 	const validateBeforeLaunch = function() {
 		// TODO check for errors, returning false if errors found
-		return this.players
+		return {teams:this.players,d,p,i,b,h}
 	}
 }

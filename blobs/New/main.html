@@ -71,14 +71,19 @@
 	<div id="template-game" hidden=hidden>
 		<button id="returnToSetup">Abort game</button>
 		<hr />
-		<div><!-- curr pyr actions -->
-			<div id="pname">(null)</div>
-			<div class="card deck">(null)</div>
-			<span id="phand">(null)</span>
-			<div class="card deadzone">(null)</div>
-		</div>
+		<table>
+			<tr><td id="pname">(null)</td></tr>
+			<tr>
+				<td id="pdeck" class="card deck">(null)</td>
+				<td id="phand">(null)</td>
+				<td id="pdead" class="card deadzone">(null)</td>
+			</tr>
+			<tr>
+				<td><button id="pok">Select !</button></td>
+			</tr>
+		</table>
 		<hr />
-		<div id="tmp-allcards">(null)</div> <!-- curr board all pyrs -->
+		<div id="boards">(null)</div>
 	</div>
 
 	<div id="template-playersetup" hidden=hidden>
