@@ -40,7 +40,7 @@ function Battle(rules, templates) {
 	// build players
 	for(let t of rules.teams) {
 		const pnb = players.length
-		const newP = {team: t, deck: [...t.cards], hand: [], board: [], dead:[], willPlay:[], pts: 0}
+		const newP = {isAlive:true, team: t, deck: [...t.cards], hand: [], board: [], dead:[], willPlay:[], pts: 0}
 
 		shuffle(newP.deck)
 
@@ -49,32 +49,44 @@ function Battle(rules, templates) {
 
 	this.start = function() {
 		console.log("Battle starting...")
+		updateBoardPoints()
 		updateBoardView()
 		fillCards()
 	}
 
 	function fillCards() { // Fill cards in players hands // TODO inside
 		console.log("Filling cards..")
+		let again = 0
 		for(let p of players) {
-			for(let cid=0; cid<rules.h; cid++) {
-				if(!p.hand[cid]) {
-					if(p.deck.size <= 0) {
-						// TODO player is dead
-						break;
-					} else {
-						p.hand[cid] = p.deck.pop()
+			if(p.isAlive) {
+				for(let cid=0; cid<rules.h; cid++) {
+					if(!p.hand[cid]) {
+						if(p.deck.size <= 0) {
+							p.isAlive = false
+							break
+						} else {
+							p.hand[cid] = p.deck.pop()
+							again++
+						}
 					}
 				}
+				again++
 			}
 		}
-
+		
+		if(again < 2) {
+			endOfGame()
+			return
+		}
+		
 		// THEN
 		setTimeout(getChoice,1)
 	}
 
 	function buildGetChoice() {
 		console.log("Building GetChoice method...")
-		let callback = () => {/* THEN */ setTimeout(applyChoices,1)}
+		// THEN
+		let callback = applyChoices
 
 		for(let p of players) {
 			if(p.board.length >= rules.b)
@@ -82,23 +94,21 @@ function Battle(rules, templates) {
 
 			const f = callback
 
-			const iaPlay = () => {
-				console.log("GetChoice finishing...")
-				while(p.board.length + p.willPlay.length < rules.b) // AI
-					p.willPlay[p.willPlay.length] = (Math.random() > 0.5) ? p.hand.pop() : p.hand.shift()
-
-				// THEN
-				setTimeout(f,500)
-			}
-
-			const playerPlay = (!p.team.isAi)
+			callback = (!p.team.isAi)
 				? () => {
-					console.log("Human player getChoice starting...")
-					updateHandView(p, iaPlay)
+					if(p.board.filter(a=>a).length + p.willPlay.length < rules.b) {
+						console.log("Human player getChoice starting...")
+						updateHandView(p, /*THEN*/ f)
+					} else f()
 				}
-				: iaPlay
+				: () => {
+					console.log("Computer playing...")
+					while(p.board.filter(a=>a).length + p.willPlay.length < rules.b) // AI
+						p.willPlay[p.willPlay.length] = (Math.random() > 0.5) ? p.hand.pop() : p.hand.shift()
 
-			callback = playerPlay
+					// THEN
+					f()
+				}
 		}
 
 		return callback
@@ -106,12 +116,31 @@ function Battle(rules, templates) {
 	const getChoice = buildGetChoice()
 
 	function applyChoices() {
-		for(let p of players)
-			while(p.willPlay.length)
-				p.board[p.board.length] = p.willPlay.pop()
+		let news = [];
+		for(let p of players) {
+			while(p.willPlay.length) {
+				let rnk = p.board.indexOf(null)
+				if(rnk < 0)
+					rnk = p.board.length
+				
+				const card = p.willPlay.pop()
+				p.board[rnk] = card
+				news[news.length] = card
+				p.hand.splice(p.hand.indexOf(card), 1)
+			}
+		}
+			
+		updateBoardView()
 
+		for(let c of news) {
+			document.getElementById(c.id).classList.add("new")
+			let hand = document.getElementById(c.id+"-hand")
+			if(hand)
+				hand.classList.add("dead")
+		}
+			
 		// THEN
-		setTimeout(resolveBattle,1)
+		setTimeout(resolveBattle,5000)
 	}
 	function resolveBattle() { // TODO finish
 		const bt = new BattleTurn()
@@ -132,19 +161,22 @@ function Battle(rules, templates) {
 		// Remove dead cards
 		sortedCards.sort((a,b)=>(a.pts-b.pts)) // min first, max last
 		let deadLimit = sortedCards[players.length-1].pts
-		const deadCards = sortedCards.filter(a=>(a<=deadLimit))
+		const deadCards = sortedCards.filter(a=>(a.pts<=deadLimit))
 		for(let d of deadCards) {
-			players[d.pid].dead[players[d.pid].dead.length] = players[d.pid].board[cid]
-			players[d.pid].board[cid] = null
+			let p = players[d.pid]
+			let card = p.board[d.cid]
+			p.dead[players[d.pid].dead.length] = card
+			document.getElementById(card.id).classList.add("dead")
+			p.board[d.cid] = null // live a blank to be replaced by newcards
 		}
-
-		updateBoardView()
+		
+		updateBoardPoints()
 
 		// THEN
-		setTimeout(fillCards,5000)
+		setTimeout(fillCards, 5000)
 	}
 
-	const getCardAsHtml = function(card, template) {
+	const getCardAsHtml = function(card, template, id) {
 		let cts = "-->"
 		for(let i=((ctsNames.length/2)|0) -1; i>=0; i--) {
 			cts = `${cts}
@@ -165,33 +197,36 @@ function Battle(rules, templates) {
 		cts += "<!--"
 
 		return template.replace(/\$bas/g, card.base)
-					.replace(/\$cid/g, card.id)
+					.replace(/\$cid/g, id || card.id)
 					.replace(/\$cts/g, cts)
 					.replace(/\$eff/g, card.effect.toString())
 					.replace(/\$gms/g, card.parties)
 					.replace(/\$nam/g, card.name)
-					.replace(/\$lvl/g, card.getLvl())
 	}
 
-	function updateBoardView() {
-		console.log("Board Updating..")
-		// Refresh board
+	function updateBoardPoints() {
 		for(let p of players) {
-			const t = p.team
-			document.getElementById(t.id + "-nam").innerHTML = t.name
-			//document.getElementById(t.id + "-rnk").innerHTML = 0 // rank
-			document.getElementById(t.id + "-pts").innerHTML = p.pts
-			document.getElementById(t.id + "-rmn").innerHTML = p.deck.length
-			document.getElementById(t.id + "-ttl").innerHTML = p.team.cards.length
-
-			const crdDiv = document.getElementById(t.id + "-crd")
-			crdDiv.innerHTML = ""
-
-			for(let c of p.board) {
-				crdDiv.innerHTML += getCardAsHtml(c, templates.card)
-			}
+			document.getElementById(p.team.id + "-nam").innerHTML = p.team.name
+			document.getElementById(p.team.id + "-rnk").innerHTML = "?" // rank TODO
+			document.getElementById(p.team.id + "-pts").innerHTML = p.pts
+			document.getElementById(p.team.id + "-rmn").innerHTML = p.deck.length
+			document.getElementById(p.team.id + "-ttl").innerHTML = p.team.cards.length
 		}
 	}
+	function updateBoardView() {
+		console.log("Board Updating..")
+		for(let p of players) {
+			const crdDiv = document.getElementById(p.team.id + "-crd")
+			let inhtml = ""
+
+			for(let c of p.board) {
+				if(c)
+					inhtml += getCardAsHtml(c, templates.card)
+			}
+			crdDiv.innerHTML = inhtml
+		}
+	}
+
 	function updateHandView(p, callBack) {
 		console.log("Hand Updating..")
 		document.getElementById("pname").innerHTML = p.team.name
@@ -201,17 +236,21 @@ function Battle(rules, templates) {
 		const crdDiv = document.getElementById("phand")
 		const bpok = document.getElementById("pok")
 		bpok.disabled = "disabled"
-		bpok.onclick = callBack
+		bpok.onclick = () => {
+			bpok.disabled = "disabled"
+			bpok.onclick = undefined
+			callBack()
+		}
 
 		let newHtml = ""
 		for(let c of p.hand) {
-			newHtml += getCardAsHtml(c, templates.card)
+			newHtml += getCardAsHtml(c, templates.card, c.id+"-hand")
 		}
 
 		crdDiv.innerHTML = newHtml
 
 		for(let c of p.hand) {
-			const a = document.getElementById(c.id)
+			const a = document.getElementById(c.id+"-hand")
 			a.onclick = () => {
 				let rnk = p.willPlay.indexOf(c)
 				if (rnk >= 0) {
@@ -227,8 +266,11 @@ function Battle(rules, templates) {
 	}
 
 	function checkCanClickOk(p) {
-		console.log("Checking ok..", p.willPlay.length, rules.b-p.board.length, rules)
-		pok.disabled = (p.board.length + p.willPlay.length === rules.b) ? undefined : "disabled"
+		pok.disabled = (p.board.filter(a=>a).length + p.willPlay.length === rules.b) ? undefined : "disabled"
+	}
+	
+	function endOfGame() {
+		alert("End of game")
 	}
 }
 

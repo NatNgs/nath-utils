@@ -3,7 +3,7 @@
 	border: 1px solid black;
 	border-radius: 2px;
 	background-color: #EEE;
-	box-shadow: 2px 2px #888888;
+	box-shadow: 2px 2px #888;
 	margin: 7px;
 	padding: 5px;
 	
@@ -11,10 +11,14 @@
 	-moz-user-select: none; /* Firefox */
 	-ms-user-select: none; /* IE10+/Edge */
 	user-select: none; /* Standard */
+	
+	opacity: 1;
+	transition: opacity 1s;
+	-webkit-transition: opacity 1s;
 }
 
 .paramerr {
-	background-color: #FFAAAA;
+	background-color: #FAA;
 }
 
 .blob table, .blob th, .blob td {
@@ -28,4 +32,17 @@
 
 .selected {
 	background-color: #DEF;
+}
+
+.new {
+	background-color: #DFD;
+}
+.dead {
+	opacity: 0.2;
+}
+
+.deck, .deadzone{
+	width: 5rem;
+	height: 7rem;
+	text-align: center;
 }

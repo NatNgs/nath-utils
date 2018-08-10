@@ -24,10 +24,6 @@ function Card() {
 	this.name = nameGen(cardNumber)
 	allCards[allCards.length] = this
 
-	this.pts = 0
-	this.totalPts = 0
-	this.parties = 0
-
 	this.cts = new Array(ctsNames.length)
 	for(let i=0; i<ctsNames.length; i++)
 		this.cts[i] = (Math.random()*10-4) |0 // -4 to 6
@@ -53,10 +49,6 @@ function Card() {
 
 		return points
 	};
-	
-	this.getLvl = function() {
-		return (Math.random()*10)|0
-	}
 
 	this.toString = function() {
 		return "{"+this.name+"}"
@@ -168,11 +160,8 @@ function BattleTurn() {
 function nameGen(number) {
 	const v = ['a', 'i', 'ü', 'é', 'o', 'ou', 'oxo', 'on', 'oho' , 'y']
 	const c = ['b', 'l', 'k', 'p', 'r', 't',  'd', 'f', 'ch', 'kr']
-	
-	if(number == 0)
-		return "Blob"
 
-	number *= number * 31
+	number = Math.abs(Math.sin(number-0.1)*10**5) |0
 
 	let str = (''+number).split('').reverse().map((x,y)=> (y%2?c:v)[x])
 	return "Blob" + str.join('');

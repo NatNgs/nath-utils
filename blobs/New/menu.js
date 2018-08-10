@@ -58,14 +58,11 @@ function Menu(run, template) {
 	}
 
 	this.newGame = function() {
-		console.log("1")
 		const param = validateNewGameParams()
-		console.log("2")
 
 		if(!param)
-			return console.log("3")
+			return
 		else {
-			console.log("4")
 			run.setup.setParams(param)
 			run.setup.load()
 		}
