@@ -1,0 +1,127 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="ssc.css">
+	<script src="actions.js"></script>
+	<script src="menu.js"></script>
+	<script src="blob.js"></script>
+	<script src="setup.js"></script>
+	<script src="game.js"></script>
+</head>
+<body onLoad="init()">
+	<div>Loading...</div>
+
+	<div id="template-menu" hidden=hidden>
+		<table>
+			<tr>
+				<td colspan=2>
+					<button id="load">Load Game</button>
+					<hr>
+				</td>
+			</tr>
+			<tr>
+				<td>Cards in deck:</td>
+				<td><input id="deckSize" type="number" min="10" max="999" value="30"/></td>
+			</tr>
+			<tr>
+				<td>Human players:</td>
+				<td><input id="playersNumber" type="number" min="0" max="10" value="1"/></td>
+			</tr>
+			<tr>
+				<td>Computer players:</td>
+				<td><input id="iaNumber" type="number" min="0" max="10" value="1"/></td>
+			</tr>
+			<tr>
+				<td>Hand size:</td>
+				<td><input id="handSize" type="number" min="2" max="10" value="5"/></td>
+			</tr>
+			<tr>
+				<td>Board size:</td>
+				<td><input id="boardSize" type="number" min="2" max="10" value="3"/></td>
+			</tr>
+			<tr>
+				<td colspan=2>
+					<button id="newGame">New Game</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="template-setup" hidden=hidden>
+		<table>
+			<tr>
+				<td>
+					<button id="launch">Launch Game</button>
+					<button id="returnToMenu">Return to menu</button>
+					<hr>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span id="playersNumber">?</span> players (<span id="humansNumber">?</span> humans, <span id="computersNumber">?</span> computers).<br/>
+					<span id="deckNumber">?</span> cards in the deck at the beginning, <span id="boardNumber">?</span> cards on the board and <span id="handNumber">?</span> cards in the hand, for each player.
+				</td>
+			</tr>
+			<tr>
+				<td id="players"></td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="template-game" hidden=hidden>
+		<button id="returnToSetup">Abort game</button>
+		<hr />
+		<table>
+			<tr><td id="pname">(null)</td></tr>
+			<tr>
+				<td id="pdeck" class="card deck">(null)</td>
+				<td id="phand">(null)</td>
+				<td id="pdead" class="card deadzone">(null)</td>
+			</tr>
+			<tr>
+				<td><button id="pok">Select !</button></td>
+			</tr>
+		</table>
+		<hr />
+		<div id="boards">(null)</div>
+	</div>
+
+	<div id="template-playersetup" hidden=hidden>
+		<div id="$p" class="card">
+			<span>Name: <input id="$p-name" value="$p"/></span><br/>
+			<button id="$p-load">Load Deck</button><br/>
+			<button id="$p-save">Save Deck</button><br/>
+			<button id="$p-edit">Edit Deck</button>
+		</div>
+	</div>
+
+	<div id="template-card" hidden=hidden>
+		<table id="$cid" class="card blob">
+			<tr>
+				<th colspan="2">$nam</th>
+			</tr>
+			<tr class="cts">
+				<td>Base: $bas</td>
+				<td>Level: $lvl</td>
+			</tr>
+			<!-- $cts -->
+			<tr class="effect">
+				<td colspan="2">$eff</td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="template-board" hidden=hidden>
+		<table>
+			<tr><td id="$b-nam" colspan=3>(null)</td></tr>
+			<tr>
+				<td>Rank: <span id="$b-rnk">(null)</span></td>
+				<td>Pts: <span id="$b-pts">(null)</span></td>
+				<td>Remaining: <span id="$b-rmn">(null)</span>/<span id="$b-ttl">(null)</span></td>
+			</tr>
+			<tr><td id="$b-crd" colspan=3>(null)</td></tr>
+		</table>
+	</div>
+
+</body>
+</html>

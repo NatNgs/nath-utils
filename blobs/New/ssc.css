@@ -1,0 +1,31 @@
+.card {
+	display: inline-block;
+	border: 1px solid black;
+	border-radius: 2px;
+	background-color: #EEE;
+	box-shadow: 2px 2px #888888;
+	margin: 7px;
+	padding: 5px;
+	
+	-webkit-user-select: none; /* Safari */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+/Edge */
+	user-select: none; /* Standard */
+}
+
+.paramerr {
+	background-color: #FFAAAA;
+}
+
+.blob table, .blob th, .blob td {
+	border: 1px solid #ccc;
+	border-radius: 1px;
+	text-align: center;
+	border-collapse: collapse;
+	margin: 3px;
+	background-color: #FFF;
+}
+
+.selected {
+	background-color: #DEF;
+}
