@@ -1,4 +1,12 @@
-const ctsNames = ['A','B','C','D']
+const ctsNames = ['R','G','B','T']
+const baseValue = {min:11, max:49}
+const ctsValues = [
+	/*R*/{min:0, max:10, minShow:0, maxShow:255, unitShow:1},
+	/*G*/{min:0, max:10, minShow:0, maxShow:255, unitShow:1},
+	/*B*/{min:0, max:10, minShow:0, maxShow:255, unitShow:1},
+	/*T*/{min:0, max:10, minShow:1, maxShow:0,   unitShow:0.1}
+]
+
 const effectsPowers = [-1, -0.5, 0.5, 1, 1.5, 2]
 
 const TARG_SELF = "Self"
@@ -22,13 +30,19 @@ function Card() {
 	this.nb = ++cardNumber // 1 to +inf
 	this.id = "card"+cardNumber
 	this.name = nameGen(cardNumber)
-	allCards[allCards.length] = this
+	allCards.push(this)
 
-	this.cts = new Array(ctsNames.length)
-	for(let i=0; i<ctsNames.length; i++)
-		this.cts[i] = (Math.random()*14-5) |0 // -5 to 9
+	this.cts = []
+	this.ctsShow = []
+	for(let i=0; i<ctsNames.length; i++) {
+		const val = ctsValues[i]
+		const rnd = Math.random()
+		this.cts[i] = (0.5 + rnd*(val.max-val.min)+val.min)|0
+		this.ctsShow[i] = ((0.5 + (rnd*(val.maxShow-val.minShow)+val.minShow)/val.unitShow)|0)*val.unitShow
+	}
+		console.log(this.ctsShow)
 
-	this.base = (Math.random()*39+10) |0 // 10 to 49
+	this.base = (Math.random()*(baseValue.max-baseValue.min)+baseValue.min)|0
 	this.effect = new Effect()
 
 	// return int
@@ -57,8 +71,8 @@ function Card() {
 
 function Effect() {
 	this.target = (Math.random()*effectsTarget.length)|0
-	this.power = effectsPowers[(Math.random()*effectsPowers.length)|0]
 	this.cts = (Math.random()*ctsNames.length)|0
+	this.power = effectsPowers[(Math.random()*effectsPowers.length)|0]
 
 	this.isApplyingTo = function(isSameCard, isSameTeam) {
 		if(this.target === targetIndex[TARG_ALL]) {
@@ -80,12 +94,15 @@ function Effect() {
 		return false
 	}
 	this.toString = function() {
-		return this.power===0
-			?"+0"
-			:(this.power>0
-				?("+"+this.power)
-				:this.power)
-			+" on "+effectsTarget[this.target]+"'s "+ctsNames[this.cts]
+		let str = this.power > 0 ? "+" : "-"
+		let pwr = Math.abs(this.power)
+		
+		if(pwr < 1) {
+			str += "1/"
+			pwr = 1/pwr
+		} 
+		
+		return str + (((10*pwr)|0)/10) +" on "+effectsTarget[this.target]+"'s "+ctsNames[this.cts]
 	}
 }
 
@@ -132,7 +149,7 @@ function CardSet(cardList /* opt */) {
 function BattleTurn() {
 	this.cardSets = []
 	this.addCardSet = function(cardArray) {
-		this.cardSets[this.cardSets.length] = new CardSet(cardArray)
+		this.cardSets.push(new CardSet(cardArray))
 	}
 	
 	// list<{c:Card, t:teamIndex, cts:list<int>, ttl:int, pwr:int}>
@@ -164,7 +181,7 @@ function BattleTurn() {
 						}
 					}
 				}
-				stats[stats.length] = stat
+				stats.push(stat)
 			}
 		}
 		

@@ -100,11 +100,10 @@ function Battle(rules, templates) {
 				? () => {
 					console.log("Computer playing...")
 					while(p.board.filter(lambdaFilterFalsey).length + p.willPlay.length < rules.b) // AI
-						p.willPlay[p.willPlay.length] = (Math.random() > 0.5) ? p.hand.pop() : p.hand.shift() // removing cards to be sure none is selected multiple time
+						p.willPlay.push((Math.random() > 0.5) ? p.hand.pop() : p.hand.shift()) // removing cards to be sure none is selected multiple time
 
 					// readding cards to hand; will be removed after applying choices
-					for(let c of p.willPlay)
-						p.hand[p.hand.length] = c
+					p.willPlay.forEach(c=>p.hand.push(c))
 
 					// THEN
 					f()
@@ -134,7 +133,7 @@ function Battle(rules, templates) {
 
 				const card = p.willPlay.pop()
 				p.board[rnk] = card
-				news[news.length] = card
+				news.push(card)
 
 				p.hand.splice(p.hand.indexOf(card), 1)
 			}
@@ -166,7 +165,7 @@ function Battle(rules, templates) {
 		let sortedCards = [] // [{pts:pts, pid:playerId, cid:cardId}, ...]
 		for(let pid=players.length-1; pid>=0; --pid) {
 			for(let cid=pts[pid].length-1; cid>=0; --cid) {
-				sortedCards[sortedCards.length] = {pts:pts[pid][cid], pid:pid, cid:cid}
+				sortedCards.push({pts:pts[pid][cid], pid:pid, cid:cid})
 			}
 		}
 
@@ -200,23 +199,24 @@ function Battle(rules, templates) {
 		for(let i=0; i<max; i++) {
 			cts = `${cts}
 <tr class="cts">
-	<td><span>${ctsNames[i*2]}: ${card.cts[i*2]}</span> <span id="${id}-stt-cts${i*2}" class="stat"></span></td>
-	<td><span>${ctsNames[i*2+1]}: ${card.cts[i*2+1]}</span> <span id="${id}-stt-cts${i*2+1}" class="stat"></span></td>
+	<td><span>${ctsNames[i*2]}: ${card.cts[i*2]|0}</span> <span id="${id}-stt-cts${i*2}" class="stat"></span></td>
+	<td><span>${ctsNames[i*2+1]}: ${card.cts[i*2+1]|0}</span> <span id="${id}-stt-cts${i*2+1}" class="stat"></span></td>
 </tr>`;
 		}
 
 		if(ctsNames.length%2 > 0) {
 			cts = `${cts}
 <tr class="cts">
-	<td><span>${ctsNames[ctsNames.length]}: ${card.cts[card.cts.length]}</span> <span id="${id}-stt-cts${ctsNames.length-1}" class="stat"></span></td>
+	<td><span>${ctsNames[ctsNames.length]}: ${card.cts[card.cts.length]|0}</span> <span id="${id}-stt-cts${ctsNames.length-1}" class="stat"></span></td>
 	<td>-</td>
 </tr>`;
 		}
 
 		cts += "<!--"
 
-		return template.replace(/\$bas/g, card.base)
+		return template.replace(/\$bas/g, card.base | 0)
 					.replace(/\$cid/g, id)
+					.replace(/\$clr/g, "rgba("+card.ctsShow.join(",")+")")
 					.replace(/\$cts/g, cts)
 					.replace(/\$eff/g, card.effect.toString())
 					.replace(/\$gms/g, card.parties)
@@ -280,7 +280,7 @@ function Battle(rules, templates) {
 					p.willPlay.splice(rnk,1)
 				} else {
 					a.classList.add("selected")
-					p.willPlay[p.willPlay.length] = c
+					p.willPlay.push(c)
 				}
 				checkCanClickOk(p)
 				updateShowStatistics(p)
@@ -301,8 +301,8 @@ function Battle(rules, templates) {
 			const pid = players.indexOf(whoisplaying)
 			const cardSet = b.cardSets[pid]
 			for(let c of whoisplaying.willPlay) {
-				inHand[inHand.length] = c
-				cardSet.cards[cardSet.cards.length] = c
+				inHand.push(c)
+				cardSet.cards.push(c)
 			}
 			
 			// Erase stats of all cards in hand
