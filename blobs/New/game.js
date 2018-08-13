@@ -174,7 +174,6 @@ function Battle(rules, templates) {
 		// Remove dead cards
 		sortedCards.sort((a,b)=>(a.pts-b.pts)) // min first, max last
 		let deadLimit = sortedCards[players.length-1].pts
-		console.log(deadLimit, JSON.stringify(sortedCards, null, " ")+"")
 		const deadCards = sortedCards.filter(a=>(a.pts<=deadLimit))
 		for(let d of deadCards) {
 			let p = players[d.pid]
@@ -182,6 +181,7 @@ function Battle(rules, templates) {
 			p.dead[players[d.pid].dead.length] = card
 			document.getElementById(card.id).classList.add("dead")
 			p.board[d.cid] = null // live a blank to be replaced by newcards
+			p.pts -= d.pts // remove points for dead cards
 		}
 
 		updateBoardPoints()
@@ -190,22 +190,23 @@ function Battle(rules, templates) {
 		setTimeout(fillCards, 5000)
 	}
 
-	function getCardAsHtml(card, template, id) {
+	function getCardAsHtml(card, template, id /* opt */) {
+		id = id || card.id
 		let cts = "-->"
 
 		let max = (ctsNames.length/2)|0
 		for(let i=0; i<max; i++) {
 			cts = `${cts}
 <tr class="cts">
-	<td>${ctsNames[i*2]}: ${card.cts[i*2]}</td>
-	<td>${ctsNames[i*2+1]}: ${card.cts[i*2+1]}</td>
+	<td><span>${ctsNames[i*2]}: ${card.cts[i*2]}</span> <span id="${id}-stt-cts${i*2}" class="stat"></span></td>
+	<td><span>${ctsNames[i*2+1]}: ${card.cts[i*2+1]}</span> <span id="${id}-stt-cts${i*2+1}" class="stat"></span></td>
 </tr>`;
 		}
 
 		if(ctsNames.length%2 > 0) {
 			cts = `${cts}
 <tr class="cts">
-	<td>${ctsNames[ctsNames.length]}: ${card.cts[card.cts.length]}</td>
+	<td><span>${ctsNames[ctsNames.length]}: ${card.cts[card.cts.length]}</span> <span id="${id}-stt-cts${ctsNames.length-1}" class="stat"></span></td>
 	<td>-</td>
 </tr>`;
 		}
@@ -213,7 +214,7 @@ function Battle(rules, templates) {
 		cts += "<!--"
 
 		return template.replace(/\$bas/g, card.base)
-					.replace(/\$cid/g, id || card.id)
+					.replace(/\$cid/g, id)
 					.replace(/\$cts/g, cts)
 					.replace(/\$eff/g, card.effect.toString())
 					.replace(/\$gms/g, card.parties)
@@ -221,10 +222,12 @@ function Battle(rules, templates) {
 	}
 
 	function updateBoardPoints() {
-		for(let p of players) {
+		let lastPts = 0
+		let rank = 0
+		for(let p of players.sort((a,b)=>b.pts-a.pts)) {
 			document.getElementById(p.team.id + "-nam").innerHTML = p.team.name
-			document.getElementById(p.team.id + "-rnk").innerHTML = "?" // rank TODO
-			document.getElementById(p.team.id + "-pts").innerHTML = p.pts
+			document.getElementById(p.team.id + "-rnk").innerHTML = ((!lastPts || lastPts >= p.pts) ? rank : ++rank)
+			document.getElementById(p.team.id + "-pts").innerHTML = (lastPts = (p.pts | 0))
 			document.getElementById(p.team.id + "-rmn").innerHTML = p.deck.length
 			document.getElementById(p.team.id + "-ttl").innerHTML = p.team.cards.length
 		}
@@ -283,7 +286,7 @@ function Battle(rules, templates) {
 		}
 	}
 
-	function updateShowStatistics(whoisplaying /* optional */) { // TODO Finish
+	function updateShowStatistics(whoisplaying /* opt */) {
 		const b = new BattleTurn()
 
 		for(let pid = 0; pid < players.length; pid++) {
@@ -293,24 +296,32 @@ function Battle(rules, templates) {
 		// Take willPlay of p in consideration if defined
 		const inHand = []
 		if(whoisplaying) {
-			const p = players.indexOf(whoisplaying)
-			const cardSet = b.cardSets[p]
-			for(let c of p.willPlay) {
+			const pid = players.indexOf(whoisplaying)
+			const cardSet = b.cardSets[pid]
+			for(let c of whoisplaying.willPlay) {
 				inHand[inHand.length] = c
 				cardSet.cards[cardSet.cards.length] = c
 			}
+			
+			// Erase stats of all cards in hand
+			for(let c of whoisplaying.hand) {
+				document.getElementById(c.id + "-hnd-stt-ttl").innerHTML = "-"
+				document.getElementById(c.id + "-hnd-stt-pwr").innerHTML = "-"
+				for(let ctsi = ctsNames.length-1; ctsi >=0; --ctsi)
+					document.getElementById(c.id + "-hnd-stt-cts"+ctsi).innerHTML = ""
+			}
 		}
-
+		
 		const stats = b.getStats() // launch debug battle, list<{c:Card, cts:list<int>, ttl:int, pwr:int}>
 		for(let s of stats) {
 			const isInHand = inHand.indexOf(s.c) >= 0
 			const id = s.c.id + (isInHand ? "-hnd" : "")
-			document.getElementById(id + "-stt-ttl").innerHTML = s.ttl
-			document.getElementById(id + "-stt-pwr").innerHTML = s.pwr
+			document.getElementById(id + "-stt-ttl").innerHTML = "&gt; " + (s.ttl | 0)
+			document.getElementById(id + "-stt-pwr").innerHTML = (s.pwr > 0 ? "(+" : "(") + (s.pwr | 0) + ")"
 
-			for(let ctsi = s.cts.length-1; ctsi >=0; --ctsi) {
-				document.getElementById(id + "-stt-ttl-"+ctsi).innerHTML = s.cts[i]
-			}
+			for(let ctsi = ctsNames.length-1; ctsi >=0; --ctsi)
+				document.getElementById(id + "-stt-cts"+ctsi).innerHTML = 
+					s.cts[ctsi] ? ((s.cts[ctsi] > 0 ? "[+" : "[") + (s.cts[ctsi] | 0) + "]") : ""
 		}
 	}
 

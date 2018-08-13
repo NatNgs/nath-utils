@@ -60,6 +60,25 @@ function Effect() {
 	this.power = effectsPowers[(Math.random()*effectsPowers.length)|0]
 	this.cts = (Math.random()*ctsNames.length)|0
 
+	this.isApplyingTo = function(isSameCard, isSameTeam) {
+		if(this.target === targetIndex[TARG_ALL]) {
+			return true
+		} else if(isSameCard) switch(this.target) {
+			case targetIndex[TARG_SELF]:
+			case targetIndex[TARG_TEAM]:
+				return true
+		} else if(isSameTeam) switch(this.target) {
+			case targetIndex[TARG_ALIE]:
+			case targetIndex[TARG_TEAM]:
+			case targetIndex[TARG_OTHR]:
+				return true
+		} else switch(this.target) {
+			case targetIndex[TARG_FOES]:
+			case targetIndex[TARG_OTHR]:
+				return true
+		}
+		return false
+	}
 	this.toString = function() {
 		return this.power===0
 			?"+0"
@@ -115,49 +134,58 @@ function BattleTurn() {
 	this.addCardSet = function(cardArray) {
 		this.cardSets[this.cardSets.length] = new CardSet(cardArray)
 	}
-
-	// list<{c:Card, cts:list<int>, ttl:int, pwr:int}>
+	
+	// list<{c:Card, t:teamIndex, cts:list<int>, ttl:int, pwr:int}>
 	//  (pwr = total pts added to team - total pts added to others teams)
 	this.getStats = function() {
-		return []
+		const stats = []
+		
+		for(let csi = this.cardSets.length-1; csi >=0; --csi) {
+			cs1 = this.cardSets[csi]
+			for(let c1 of cs1.cards) {
+				// init
+				const stat = {c:c1, t:csi, ttl:c1.base, pwr:0, cts:[]}
+				for(let ctsi = 0; ctsi < ctsNames.length; ctsi++) {
+					stat.cts[ctsi] = 0
+				}
+				
+				for(let cs2 of this.cardSets) {
+					for(let c2 of cs2.cards) {
+						// compute c1.ttl && c1.cts (apply c2.effect on c1.cts)
+						if(c2.effect.isApplyingTo(c1===c2, cs1===cs2)) {
+							let pwr = c2.effect.power * c1.cts[c2.effect.cts]
+							stat.cts[c2.effect.cts] += pwr
+							stat.ttl += pwr
+						}
+						
+						// compute c1.pwr
+						if(c1.effect.isApplyingTo(c1===c2, cs1===cs2)) {
+							stat.pwr += (cs1!==cs2 ? -1 : 1) * c1.effect.power * c2.cts[c1.effect.cts]
+						}
+					}
+				}
+				stats[stats.length] = stat
+			}
+		}
+		
+		return stats
 	}
 	
 	// tab[cardSetIndex][ctsIndex] = coef
 	this.getPts = function() {
-		// init coefs
-		const coefs = [] // tab[cardSet][cts] = int
-		for(let tn=0; tn<this.cardSets.length; tn++) {
-			const cardSetCoefs = []
-			for(let ctsi=0; ctsi<ctsNames.length; ctsi++)
-				cardSetCoefs[ctsi] = 0
-
-			coefs[tn] = cardSetCoefs
-		}
-
-		// compute cardSets coefs
-		for(let tn=0; tn<this.cardSets.length; tn++) {
-			const ccardSet = this.cardSets[tn].getCoefs() // return tab[ctsIndex][targetIndex] = int
-
-			for(let ctsi=ctsNames.length-1; ctsi>=0; ctsi--) {
-				const ccardSeti = ccardSet.pop(); // ccardSet[ctsi]
-				const allValue = ccardSeti[targetIndex[TARG_ALL]] + ccardSeti[targetIndex[TARG_OTHR]]
-
-				// compute & apply cardSet tn coefs
-				coefs[tn][ctsi] += allValue + ccardSeti[targetIndex[TARG_TEAM]] + ccardSeti[targetIndex[TARG_ALIE]]
-
-				// compute others cardSets coefs
-				const foeValue = allValue + ccardSeti[targetIndex[TARG_FOES]]
-
-				// apply others cardSets coefs
-				for(let fn=this.cardSets.length-1;fn>=0; fn--)
-					if(fn!==tn) coefs[fn][ctsi] += foeValue
-			}
-		}
+		const stats = this.getStats()
 
 		// compute points for each card
 		const points = []
-		for(let i=0; i<this.cardSets.length; i++)
-			points[i] = this.cardSets[i].getPoints(coefs[i])
+		for(let i=0; i<this.cardSets.length; i++) {
+			points[i] = []
+			for(let j=0; j<this.cardSets[i].cards.length; j++) 
+				points[i][j] = 0
+		}
+		
+		for(let s of stats) {
+			points[s.t][this.cardSets[s.t].cards.indexOf(s.c)] = s.ttl
+		}
 
 		return points // tab[cardSetIndex][cardIndex] = points
 	};
