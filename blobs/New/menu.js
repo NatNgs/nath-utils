@@ -4,7 +4,7 @@ function Menu(run, template) {
 
 		document.getElementById("newGame").onclick = this.newGame
 		document.getElementById("load").onclick = () => { alert("Not yet available") }
-		console.log("LOADED MENU", this)
+		console.log("LOADED MENU")
 	}
 
 	const validateNewGameParams = function() {
