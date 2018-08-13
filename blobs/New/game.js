@@ -166,7 +166,6 @@ function Battle(rules, templates) {
 		let sortedCards = [] // [{pts:pts, pid:playerId, cid:cardId}, ...]
 		for(let pid=players.length-1; pid>=0; --pid) {
 			for(let cid=pts[pid].length-1; cid>=0; --cid) {
-				players[pid].pts += pts[pid][cid]
 				sortedCards[sortedCards.length] = {pts:pts[pid][cid], pid:pid, cid:cid}
 			}
 		}
@@ -181,7 +180,10 @@ function Battle(rules, templates) {
 			p.dead[players[d.pid].dead.length] = card
 			document.getElementById(card.id).classList.add("dead")
 			p.board[d.cid] = null // live a blank to be replaced by newcards
-			p.pts -= d.pts // remove points for dead cards
+			
+			p.pts -= d.pts // do not earn points for his own dead cards
+			for(p of players)
+				p.pts += d.pts // earn points for all enemies cards dead
 		}
 
 		updateBoardPoints()
@@ -222,11 +224,11 @@ function Battle(rules, templates) {
 	}
 
 	function updateBoardPoints() {
-		let lastPts = 0
+		let lastPts = -1
 		let rank = 0
 		for(let p of players.sort((a,b)=>b.pts-a.pts)) {
 			document.getElementById(p.team.id + "-nam").innerHTML = p.team.name
-			document.getElementById(p.team.id + "-rnk").innerHTML = ((!lastPts || lastPts >= p.pts) ? rank : ++rank)
+			document.getElementById(p.team.id + "-rnk").innerHTML = ((lastPts<0 || lastPts !== p.pts) ? ++rank : rank)
 			document.getElementById(p.team.id + "-pts").innerHTML = (lastPts = (p.pts | 0))
 			document.getElementById(p.team.id + "-rmn").innerHTML = p.deck.length
 			document.getElementById(p.team.id + "-ttl").innerHTML = p.team.cards.length
