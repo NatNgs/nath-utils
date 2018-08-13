@@ -78,7 +78,7 @@ function Team(id, name) {
 }
 
 
-function CardSet(cardList) {
+function CardSet(cardList /* opt */) {
 	this.cards = cardList || []
 	
 	this.getCoefs = function() {
@@ -116,7 +116,13 @@ function BattleTurn() {
 		this.cardSets[this.cardSets.length] = new CardSet(cardArray)
 	}
 
-	// return tab[cardSetIndex][ctsIndex] = coef
+	// list<{c:Card, cts:list<int>, ttl:int, pwr:int}>
+	//  (pwr = total pts added to team - total pts added to others teams)
+	this.getStats = function() {
+		return []
+	}
+	
+	// tab[cardSetIndex][ctsIndex] = coef
 	this.getPts = function() {
 		// init coefs
 		const coefs = [] // tab[cardSet][cts] = int

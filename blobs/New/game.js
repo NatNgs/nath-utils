@@ -49,36 +49,38 @@ function Battle(rules, templates) {
 
 	this.start = function() {
 		console.log("Battle starting...")
-		updateBoardPoints()
 		updateBoardView()
 		fillCards()
 	}
 
-	function fillCards() { // Fill cards in players hands // TODO inside
+	function fillCards() {
 		console.log("Filling cards..")
-		let again = 0
+		let playersAlive = 0
 		for(let p of players) {
 			if(p.isAlive) {
 				for(let cid=0; cid<rules.h; cid++) {
 					if(!p.hand[cid]) {
-						if(p.deck.size <= 0) {
+						if(p.deck.length <= 0) {
 							p.isAlive = false
 							break
 						} else {
 							p.hand[cid] = p.deck.pop()
-							again++
+							playersAlive++
 						}
 					}
 				}
-				again++
+				playersAlive++
 			}
 		}
-		
-		if(again < 2) {
+
+		// Less than 2 players alive => end of game
+		if(playersAlive <= 1) {
 			endOfGame()
 			return
 		}
-		
+
+		updateBoardPoints()
+
 		// THEN
 		setTimeout(getChoice,1)
 	}
@@ -94,20 +96,26 @@ function Battle(rules, templates) {
 
 			const f = callback
 
-			callback = (!p.team.isAi)
+			callback = (p.team.isAi)
 				? () => {
-					if(p.board.filter(a=>a).length + p.willPlay.length < rules.b) {
-						console.log("Human player getChoice starting...")
-						updateHandView(p, /*THEN*/ f)
-					} else f()
-				}
-				: () => {
 					console.log("Computer playing...")
-					while(p.board.filter(a=>a).length + p.willPlay.length < rules.b) // AI
-						p.willPlay[p.willPlay.length] = (Math.random() > 0.5) ? p.hand.pop() : p.hand.shift()
+					while(p.board.filter(lambdaFilterFalsey).length + p.willPlay.length < rules.b) // AI
+						p.willPlay[p.willPlay.length] = (Math.random() > 0.5) ? p.hand.pop() : p.hand.shift() // removing cards to be sure none is selected multiple time
+
+					// readding cards to hand; will be removed after applying choices
+					for(let c of p.willPlay)
+						p.hand[p.hand.length] = c
 
 					// THEN
 					f()
+				}
+				: () => {
+					console.log("Human playing...")
+					updateShowStatistics()
+					if(p.board.filter(a=>a).length + p.willPlay.length < rules.b)
+						updateHandView(p, /*THEN*/ f)
+					else
+						f()
 				}
 		}
 
@@ -116,33 +124,38 @@ function Battle(rules, templates) {
 	const getChoice = buildGetChoice()
 
 	function applyChoices() {
+		// Moving willPlay cards from hand to board
 		let news = [];
 		for(let p of players) {
 			while(p.willPlay.length) {
 				let rnk = p.board.indexOf(null)
 				if(rnk < 0)
 					rnk = p.board.length
-				
+
 				const card = p.willPlay.pop()
 				p.board[rnk] = card
 				news[news.length] = card
+
 				p.hand.splice(p.hand.indexOf(card), 1)
 			}
 		}
-			
-		updateBoardView()
 
+		updateBoardPoints()
+		updateBoardView()
+		updateShowStatistics()
+
+		// Set new cards style
 		for(let c of news) {
 			document.getElementById(c.id).classList.add("new")
-			let hand = document.getElementById(c.id+"-hand")
+			let hand = document.getElementById(c.id+"-hnd")
 			if(hand)
 				hand.classList.add("dead")
 		}
-			
+
 		// THEN
 		setTimeout(resolveBattle,5000)
 	}
-	function resolveBattle() { // TODO finish
+	function resolveBattle() {
 		const bt = new BattleTurn()
 		for(let p of players) {
 			bt.addCardSet(p.board)
@@ -170,16 +183,16 @@ function Battle(rules, templates) {
 			document.getElementById(card.id).classList.add("dead")
 			p.board[d.cid] = null // live a blank to be replaced by newcards
 		}
-		
+
 		updateBoardPoints()
 
 		// THEN
 		setTimeout(fillCards, 5000)
 	}
 
-	const getCardAsHtml = function(card, template, id) {
+	function getCardAsHtml(card, template, id) {
 		let cts = "-->"
-		
+
 		let max = (ctsNames.length/2)|0
 		for(let i=0; i<max; i++) {
 			cts = `${cts}
@@ -247,13 +260,14 @@ function Battle(rules, templates) {
 
 		let newHtml = ""
 		for(let c of p.hand) {
-			newHtml += getCardAsHtml(c, templates.card, c.id+"-hand")
+			if(c)
+				newHtml += getCardAsHtml(c, templates.card, c.id+"-hnd")
 		}
 
 		crdDiv.innerHTML = newHtml
 
 		for(let c of p.hand) {
-			const a = document.getElementById(c.id+"-hand")
+			const a = document.getElementById(c.id+"-hnd")
 			a.onclick = () => {
 				let rnk = p.willPlay.indexOf(c)
 				if (rnk >= 0) {
@@ -264,6 +278,38 @@ function Battle(rules, templates) {
 					p.willPlay[p.willPlay.length] = c
 				}
 				checkCanClickOk(p)
+				updateShowStatistics(p)
+			}
+		}
+	}
+
+	function updateShowStatistics(whoisplaying /* optional */) { // TODO Finish
+		const b = new BattleTurn()
+
+		for(let pid = 0; pid < players.length; pid++) {
+			b.addCardSet(players[pid].board.filter(lambdaFilterFalsey))
+		}
+
+		// Take willPlay of p in consideration if defined
+		const inHand = []
+		if(whoisplaying) {
+			const p = players.indexOf(whoisplaying)
+			const cardSet = b.cardSets[p]
+			for(let c of p.willPlay) {
+				inHand[inHand.length] = c
+				cardSet.cards[cardSet.cards.length] = c
+			}
+		}
+
+		const stats = b.getStats() // launch debug battle, list<{c:Card, cts:list<int>, ttl:int, pwr:int}>
+		for(let s of stats) {
+			const isInHand = inHand.indexOf(s.c) >= 0
+			const id = s.c.id + (isInHand ? "-hnd" : "")
+			document.getElementById(id + "-stt-ttl").innerHTML = s.ttl
+			document.getElementById(id + "-stt-pwr").innerHTML = s.pwr
+
+			for(let ctsi = s.cts.length-1; ctsi >=0; --ctsi) {
+				document.getElementById(id + "-stt-ttl-"+ctsi).innerHTML = s.cts[i]
 			}
 		}
 	}
@@ -271,9 +317,10 @@ function Battle(rules, templates) {
 	function checkCanClickOk(p) {
 		pok.disabled = (p.board.filter(a=>a).length + p.willPlay.length === rules.b) ? undefined : "disabled"
 	}
-	
-	function endOfGame() {
+
+	function endOfGame() { // TODO finish
 		alert("End of game")
 	}
 }
 
+function lambdaFilterFalsey(a) { return !!a }
