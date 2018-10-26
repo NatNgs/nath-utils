@@ -11,24 +11,24 @@ function Astro() {
 	this.x = 0;
 	this.y = 0;
 	this.rot = 0; // rot (0=head up,1=head left,2=head down,3=head right)
-	
+
 	this.left = function() {
-		this.rot = 1
+		this.rot = 3
 		if(!map.isWall(this.x-1, this.y))
 			this.x --
 	}
 	this.right = function() {
-		this.rot = 3
+		this.rot = 1
 		if(!map.isWall(this.x+1, this.y))
 			this.x ++
 	}
 	this.up = function() {
-		this.rot = 0
+		this.rot = 2
 		if(!map.isWall(this.x, this.y+1))
 			this.y ++
 	}
 	this.down = function() {
-		this.rot = 2
+		this.rot = 0
 		if(!map.isWall(this.x, this.y-1))
 			this.y --
 	}
@@ -37,14 +37,23 @@ function Astro() {
 function Grid() {
 	let walls = new Set();
 
-	// Generate walls
+	// Random walls
 	for(let i=-mapSize; i<mapSize; i++)
 		for(let j=-mapSize; j<mapSize; j++)
 			if(Math.random() < 0.25)
 				walls.add(idOf(i,j))
 
-	walls.delete(idOf(0, 0)) // spawn
-	walls.add(idOf(-1, 0)) // below spawn
+	// world border
+	for(let i=-mapSize+1; i<mapSize; i++) {
+		walls.add(idOf(i, -mapSize))
+		walls.add(idOf(i, mapSize))
+		walls.add(idOf(-mapSize, i))
+		walls.add(idOf(mapSize, i))
+	}
+
+	// Spawn
+	walls.delete(idOf(0, 0))
+	walls.add(idOf(0, -1))
 
 	this.isWall = function(x,y) {
 		return walls.has(idOf(x,y))
@@ -67,11 +76,16 @@ function init() {
 	// refresh view
 	refreshView();
 
-	// Bind buttons
+	bindButtons()
+}
+
+function bindButtons() {
 	document.onkeydown = buttonPressed;
 }
 
 function buttonPressed(e = window.event) {
+	document.onkeydown = undefined;
+
 	switch(e.keyCode) {
 	case 37: // left arrow
 		astro.left()
@@ -87,11 +101,14 @@ function buttonPressed(e = window.event) {
 		break;
 	}
 	refreshView()
+	document.onkeydown = buttonPressed;
 }
 
 function refreshView() {
 	for(let i=-showGrid; i<=showGrid; i++) {
 		for(let j=-showGrid; j<=showGrid; j++) {
+			if(i===0 && j===0)
+				continue;
 			const cell = document.getElementById(idOf(i,j))
 			if(map.isWall(astro.x+i,astro.y+j))
 				cell.classList.add('wall')
@@ -99,7 +116,7 @@ function refreshView() {
 				cell.classList.remove('wall')
 		}
 	}
-	
+
 	const astroCell = document.getElementById(idOf(0, 0))
 	for(let rot=0; rot<4; rot++) {
 		if(astro.rot === rot)
