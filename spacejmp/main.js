@@ -167,6 +167,8 @@ function buttonPressed(e = window.event) {
 	case 40: // down arrow
 		astro.down(bindButtons)
 		break;
+	default:
+		bindButtons();
 	}
 }
 
