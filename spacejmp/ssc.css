@@ -8,6 +8,23 @@
 	background-color: #000
 }
 
+.astro0 {
+	background-image: url("astro0.png");
+	background-size: cover;
+}
+.astro1 {
+	background-image: url("astro1.png");
+	background-size: cover;
+}
+.astro2 {
+	background-image: url("astro2.png");
+	background-size: cover;
+}
+.astro3 {
+	background-image: url("astro3.png");
+	background-size: cover;
+}
+
 table {
 	border: 1px solid black;
 	border-collapse:collapse;

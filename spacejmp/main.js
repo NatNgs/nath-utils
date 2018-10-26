@@ -59,18 +59,22 @@ function buttonPressed(e = window.event) {
 	case 37:
 		// left arrow
 		map.pLoc[1]--
+		map.pLoc[2] = 1
 		break;
 	case 38:
 		// up arrow
 		map.pLoc[0]--
+		map.pLoc[2] = 0
 		break;
 	case 39:
 		// right arrow
 		map.pLoc[1]++
+		map.pLoc[2] = 3
 		break;
 	case 40:
 		// down arrow
 		map.pLoc[0]++
+		map.pLoc[2] = 2
 		break;
 	}
 	refreshView()
@@ -87,4 +91,14 @@ function refreshView() {
 				cell.classList.remove('wall')
 		}
 	}
+	
+	const astroCell = document.getElementById(idOf(4, 4))
+	for(let rot=0; rot<4; rot++) {
+		if(map.pLoc[2] == rot)
+			astroCell.classList.add('astro'+rot)
+		else
+			astroCell.classList.remove('astro'+rot)
+	}
+	
+	
 }
