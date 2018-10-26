@@ -12,25 +12,93 @@ function Astro() {
 	this.y = 0;
 	this.rot = 0; // rot (0=head up,1=head left,2=head down,3=head right)
 
-	this.left = function() {
-		this.rot = 3
-		if(!map.isWall(this.x-1, this.y))
+	this.left = function(cb) {
+		if(map.isWall(this.x-1, this.y)) {
+			this.rot = 3
+		} else {
 			this.x --
+			if(map.isWall(this.x-1, this.y)) {
+				this.rot = 3
+			} else if(map.isWall(this.x, this.y-1)) {
+				this.rot = 0
+			} else if(map.isWall(this.x, this.y+1)) {
+				this.rot = 2
+			} else {
+				this.rot = 1
+				setTimeout(()=>this.left(cb), 100)
+				refreshView()
+				return;
+			}
+		}
+
+		refreshView()
+		cb()
 	}
-	this.right = function() {
-		this.rot = 1
-		if(!map.isWall(this.x+1, this.y))
+	this.right = function(cb) {
+		if(map.isWall(this.x+1, this.y)) {
+			this.rot = 1
+		} else {
 			this.x ++
+			if(map.isWall(this.x+1, this.y)) {
+				this.rot = 1
+			} else if(map.isWall(this.x, this.y-1)) {
+				this.rot = 0
+			} else if(map.isWall(this.x, this.y+1)) {
+				this.rot = 2
+			} else {
+				this.rot = 3
+				setTimeout(()=>this.right(cb), 100)
+				refreshView()
+				return;
+			}
+		}
+
+		refreshView()
+		cb()
 	}
-	this.up = function() {
-		this.rot = 2
-		if(!map.isWall(this.x, this.y+1))
+	this.up = function(cb) {
+		if(map.isWall(this.x, this.y+1)) {
+			this.rot = 2
+		} else {
 			this.y ++
+			if(map.isWall(this.x, this.y+1)) {
+				this.rot = 2
+			} else if(map.isWall(this.x-1, this.y)) {
+				this.rot = 3
+			} else if(map.isWall(this.x+1, this.y)) {
+				this.rot = 1
+			} else {
+				this.rot = 0
+				setTimeout(()=>this.up(cb), 100)
+				refreshView()
+				return;
+			}
+		}
+
+		refreshView()
+		cb()
 	}
-	this.down = function() {
-		this.rot = 0
-		if(!map.isWall(this.x, this.y-1))
+	this.down = function(cb) {
+		if(map.isWall(this.x, this.y-1)) {
+			this.rot = 0
+		} else {
 			this.y --
+			if(map.isWall(this.x, this.y-1)) {
+				this.rot = 0
+			} else if(map.isWall(this.x+1, this.y)) {
+				this.rot = 1
+			} else if(map.isWall(this.x-1, this.y)) {
+				this.rot = 3
+			} else {
+				this.rot = 2
+				setTimeout(()=>this.down(cb), 100)
+				refreshView()
+				return;
+			}
+		}
+
+		refreshView()
+		cb()
 	}
 }
 
@@ -88,20 +156,18 @@ function buttonPressed(e = window.event) {
 
 	switch(e.keyCode) {
 	case 37: // left arrow
-		astro.left()
+		astro.left(bindButtons)
 		break;
 	case 38: // up arrow
-		astro.up()
+		astro.up(bindButtons)
 		break;
 	case 39: // right arrow
-		astro.right()
+		astro.right(bindButtons)
 		break;
 	case 40: // down arrow
-		astro.down()
+		astro.down(bindButtons)
 		break;
 	}
-	refreshView()
-	document.onkeydown = buttonPressed;
 }
 
 function refreshView() {
