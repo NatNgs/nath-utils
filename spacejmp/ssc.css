@@ -1,0 +1,14 @@
+.cell {
+	border: 1px dotted black;
+	width: 30px;
+	height: 30px;
+}
+.wall {
+	border: 1px dotted white;
+	background-color: #000
+}
+
+table {
+	border: 1px solid black;
+	border-collapse:collapse;
+}
