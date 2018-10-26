@@ -72,14 +72,14 @@
 		<button id="returnToSetup">Abort game</button>
 		<hr />
 		<table>
-			<tr><td id="pname">(null)</td></tr>
+			<tr><td id="pname" colspan="3">(null)</td></tr>
 			<tr>
-				<td id="pdeck" class="card deck">(null)</td>
+				<td class="card deck">Deck<br/><span id="pdeck">(null)</span></td>
 				<td id="phand">(null)</td>
-				<td id="pdead" class="card deadzone">(null)</td>
+				<td class="card deadzone">Trash<br/><span id="pdead">(null)</span></td>
 			</tr>
 			<tr>
-				<td><button id="pok">Select !</button></td>
+				<td colspan="3"><button id="pok">Select !</button></td>
 			</tr>
 		</table>
 		<hr />
@@ -98,11 +98,17 @@
 	<div id="template-card" hidden=hidden>
 		<table id="$cid" class="card blob">
 			<tr>
+				<td colspan="2" class="crdclr"><div style="background-color: $clr;"></div></td>
+			</tr>
+			<tr>
 				<th colspan="2">$nam</th>
 			</tr>
 			<tr class="cts">
 				<td>Base: $bas</td>
-				<td>Level: $lvl</td>
+				<td>
+					<span id="$cid-stt-ttl" class="stat">-</span><br/>
+					<span id="$cid-stt-pwr" class="stat">-</span>
+				</td>
 			</tr>
 			<!-- $cts -->
 			<tr class="effect">
