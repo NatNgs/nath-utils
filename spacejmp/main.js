@@ -1,52 +1,69 @@
-const gridSize = 9;
-const mapSize = 9;
+const showGrid = 4; // ! Value x2+1 (-gridSize to gridSize)
+const mapSize = 9; // ! Value x2+1 (-mapSize to mapSize)
 const map = new Grid();
+const astro = new Astro();
 
 function idOf(x,y) {
 	return 'c'+x+'_'+y;
 }
 
+function Astro() {
+	this.x = 0;
+	this.y = 0;
+	this.rot = 0; // rot (0=head up,1=head left,2=head down,3=head right)
+	
+	this.left = function() {
+		this.rot = 1
+		if(!map.isWall(this.x-1, this.y))
+			this.x --
+	}
+	this.right = function() {
+		this.rot = 3
+		if(!map.isWall(this.x+1, this.y))
+			this.x ++
+	}
+	this.up = function() {
+		this.rot = 0
+		if(!map.isWall(this.x, this.y+1))
+			this.y ++
+	}
+	this.down = function() {
+		this.rot = 2
+		if(!map.isWall(this.x, this.y-1))
+			this.y --
+	}
+}
+
 function Grid() {
 	let walls = new Set();
-	this.pLoc = [0, 0, 0]; // x, y, rot (0=head up,1=head left,2=head down,3=head right)
-	
+
 	// Generate walls
-	for(let i=0; i<mapSize; i++)
-		for(let j=0; j<mapSize; j++)
+	for(let i=-mapSize; i<mapSize; i++)
+		for(let j=-mapSize; j<mapSize; j++)
 			if(Math.random() < 0.25)
 				walls.add(idOf(i,j))
-	
-	this.getWallsAround = function() {
-		const grid = [];
-		
-		for(let i=0; i<gridSize; i++) {
-			grid[i] = [];
-			for(let j=0; j<mapSize; j++) {
-				const id = idOf(
-					i+this.pLoc[0],
-					j+this.pLoc[1]
-				)
-				grid[i][j] = walls.has(id)
-			}
-		}
-		
-		return grid;
+
+	walls.delete(idOf(0, 0)) // spawn
+	walls.add(idOf(-1, 0)) // below spawn
+
+	this.isWall = function(x,y) {
+		return walls.has(idOf(x,y))
 	}
 }
 
 function init() {
 	// generate grid
 	const grid = document.getElementById('grid');
-	
+
 	let gridText = '';
-	for(let i=0; i<gridSize; i++) {
+	for(let y=-showGrid; y<=showGrid; y++) {
 		gridText += '<tr>'
-		for(let j=0; j<gridSize; j++)
-			gridText += '<td id="'+idOf(i,j)+'" class="cell"></td>'
+		for(let x=-showGrid; x<=showGrid; x++)
+			gridText += '<td id="'+idOf(x,-y)+'" class="cell"></td>'
 		gridText += '</tr>'
 	}
 	grid.innerHTML = gridText;
-	
+
 	// refresh view
 	refreshView();
 
@@ -56,49 +73,38 @@ function init() {
 
 function buttonPressed(e = window.event) {
 	switch(e.keyCode) {
-	case 37:
-		// left arrow
-		map.pLoc[1]--
-		map.pLoc[2] = 1
+	case 37: // left arrow
+		astro.left()
 		break;
-	case 38:
-		// up arrow
-		map.pLoc[0]--
-		map.pLoc[2] = 0
+	case 38: // up arrow
+		astro.up()
 		break;
-	case 39:
-		// right arrow
-		map.pLoc[1]++
-		map.pLoc[2] = 3
+	case 39: // right arrow
+		astro.right()
 		break;
-	case 40:
-		// down arrow
-		map.pLoc[0]++
-		map.pLoc[2] = 2
+	case 40: // down arrow
+		astro.down()
 		break;
 	}
 	refreshView()
 }
 
 function refreshView() {
-	const currGrid = map.getWallsAround()
-	for(let i=0; i<gridSize; i++) {
-		for(let j=0; j<gridSize; j++) {
+	for(let i=-showGrid; i<=showGrid; i++) {
+		for(let j=-showGrid; j<=showGrid; j++) {
 			const cell = document.getElementById(idOf(i,j))
-			if(currGrid[i][j])
+			if(map.isWall(astro.x+i,astro.y+j))
 				cell.classList.add('wall')
 			else
 				cell.classList.remove('wall')
 		}
 	}
 	
-	const astroCell = document.getElementById(idOf(4, 4))
+	const astroCell = document.getElementById(idOf(0, 0))
 	for(let rot=0; rot<4; rot++) {
-		if(map.pLoc[2] == rot)
+		if(astro.rot === rot)
 			astroCell.classList.add('astro'+rot)
 		else
 			astroCell.classList.remove('astro'+rot)
 	}
-	
-	
 }
