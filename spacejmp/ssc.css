@@ -25,7 +25,30 @@
 	background-size: cover;
 }
 
-table {
+.ownAlly {
+	background-color: #99FFCC;
+}
+
+.ownEnemy {
+	background-color: #FFAAAA;
+}
+
+
+#grid, #scores, .command {
 	border: 1px solid black;
 	border-collapse:collapse;
+}
+
+.kbd {
+	display: inline-block;
+	background-color: #FAFAFA;
+	height: 15px;
+	min-width: 15px;
+	text-align: center;
+	margin: 2px;
+	padding: 2px;
+	border-radius: 2px;
+	border: 1px solid #CCCCCC;
+	border-right: 1px solid #333333;
+	border-bottom: 1px solid #333333;
 }
