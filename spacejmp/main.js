@@ -1,26 +1,40 @@
 const MAP_SIZE = 15; // map size = Value×2+1 (-MAP_SIZE to MAP_SIZE)
-const DISPLAY_SIZE = 5; // grid view size = Value×2+1 (-gridSize to gridSize)
+var DISPLAY_SIZE = 5; // grid view size = Value×2+1 (-gridSize to gridSize)
 const WALL_CHANCE = 0.25; // between 0 and 1
 const WALL = 'wall'; // css class
+const TIMEOUT = 1;
 
 function idOf(x,y) {
 	return 'c'+x+'_'+y;
 }
 
 function Grid() {
+	this.display = null;
+	this.astroCollide = true;
+	this.maxTurns = 0;
+	this.onEnd = null; // function
+	
 	const THIS = this;
 	const allAstros = [];
 	const walls = new Set();
+	const coins = new Set();
 	const score = new Map();
-	const colors = new Map();
+	let currTurn = 0;
 
 	// // // Public functions
 	this.launch = function() {
-		turnA([...allAstros])
+		if(THIS.maxTurns > 0 && currTurn >= THIS.maxTurns) {
+			currTurn = 0
+			if(THIS.onEnd)
+				THIS.onEnd()
+		} else {
+			currTurn++
+			turnA([...allAstros])
+		}
 	}
 
-	this.getColorOf = function(x,y) {
-		return colors.get(idOf(x,y))
+	this.isCoinOn = function(x,y) {
+		return coins.has(idOf(x,y))
 	}
 	this.getScores = function() {
 		const ret = []
@@ -28,21 +42,34 @@ function Grid() {
 			ret.push({astro:e[0], pts:e[1]})
 		return ret
 	}
-
-	this.getCell = function(x,y) {
+	this.reset = function() {
+		while(allAstros.shift());
+		score.clear()
+		coins.clear()
+		currTurn = 0;
+		// keep the walls
+		// keep display
+		// keep onEnd method
+		// keep maxTurns
+		// keep astroCollide
+	}
+	
+	this.getCell = function(x,y,seeAll) {
 		const id = idOf(x,y)
 		if(walls.has(id))
 			return WALL;
-		for(astro of allAstros) {
-			if(astro.x === x && astro.y === y)
-				return 'astro'+astro.rot;
-		}
+		if(seeAll || this.astroCollide)
+			for(astro of allAstros)
+				if(astro.x === x && astro.y === y)
+					return 'astro'+astro.rot;
 		return false;
 	}
 
 	this.addAstro = function(astro) {
 		allAstros.push(astro)
-		score.set(astro.name, 0)
+		score.set(astro, 0)
+		for(let i=0; i<5; i++)
+			addNewCoin()
 	}
 
 	// // // Private Functions
@@ -64,6 +91,8 @@ function Grid() {
 	 * If was possible, callback will return true, and then will not accept any more call to it (will return true indefinitelly)
 	 */
 	function turnA(whoNext) {
+		if(THIS.display)
+			THIS.display.refreshView()
 		if(whoNext.length <=0) {
 			setTimeout(THIS.launch, 0)
 			return
@@ -71,13 +100,13 @@ function Grid() {
 
 		const curr = whoNext.shift()
 		const next = () => {
-			const lastColor = colors.get(idOf(curr.x, curr.y))
-			if(lastColor)
-				score.set(lastColor, score.get(lastColor)-1)
-			score.set(curr.name, score.get(curr.name)+1)
-			colors.set(idOf(curr.x, curr.y), curr.name)
+			if(THIS.isCoinOn(curr.x, curr.y)) {
+				coins.delete(idOf(curr.x, curr.y))
+				score.set(curr, score.get(curr)+1)
+				addNewCoin()
+			}
 			curr.refreshView()
-			setTimeout(()=>turnA(whoNext),33)
+			setTimeout(()=>turnA(whoNext),TIMEOUT)
 		}
 
 		if(curr.fly()) { // try to fly (true if done, false if not flying)
@@ -89,6 +118,7 @@ function Grid() {
 				if(secur)
 					return true // turn was already done
 				secur = true
+				//console.log(curr.name, 'played', action)
 
 				if(action !== -1 // WAIT cmd
 				  && (action < 0 || action > 5 // command out of bounds
@@ -102,6 +132,15 @@ function Grid() {
 		}
 	}
 
+	function addNewCoin() {
+		let newX, newY;
+		do { 
+			newX = ((Math.random()*MAP_SIZE*2-1)-MAP_SIZE+1)|0
+			newY = ((Math.random()*MAP_SIZE*2-1)-MAP_SIZE+1)|0
+		} while(THIS.getCell(newX,newY) || THIS.isCoinOn(newX, newY));
+		coins.add(idOf(newX, newY))
+	}
+	
 	// // // Init
 	// Random walls
 	for(let i=-MAP_SIZE; i<MAP_SIZE; i++)
@@ -116,29 +155,6 @@ function Grid() {
 		walls.add(idOf(-MAP_SIZE, i))
 		walls.add(idOf(MAP_SIZE, i))
 	}
-}
-
-function init() {
-	// generate grid
-	const display = document.getElementById('grid');
-
-	let html = '';
-	for(let y=DISPLAY_SIZE; y>=-DISPLAY_SIZE; --y) {
-		html += '<tr>'
-		for(let x=-DISPLAY_SIZE; x<=DISPLAY_SIZE; x++)
-			html += '<td id="'+idOf(x,y)+'" class="cell"></td>'
-		html += '</tr>'
-	}
-	display.innerHTML = html;
-
-
-	// launch
-	const grid = new Grid();
-
-	// Generate players
-	grid.addAstro(generateManPlayer(grid))
-	for(let i=5; i>=0; --i)
-		grid.addAstro(generateBotPlayer(grid))
-
-	grid.launch()
+		
+	this.reset()
 }

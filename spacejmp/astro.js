@@ -134,22 +134,20 @@ function generateManPlayer(grid) {
 				cell.remove('astro1')
 				cell.remove('astro2')
 				cell.remove('astro3')
-				cell.remove('ownAlly')
-				cell.remove('ownEnemy')
+				cell.remove('coin')
 
 				const somethingOnCell = grid.getCell(astro.x+i,astro.y+j)
 				if(somethingOnCell)
 					cell.add(somethingOnCell)
-				const color = grid.getColorOf(astro.x+i, astro.y+j)
-				if(color)
-					cell.add(color === astro.name ? 'ownAlly' : 'ownEnemy')
+				if(grid.isCoinOn(astro.x+i, astro.y+j))
+					cell.add('coin')
 			}
 		}
 
 		// Score
 		let html = '<tr><th>Astro</th><th>Score</th>'
 		for(let i of grid.getScores().sort((a,b)=>b.pts-a.pts)) {
-			html += '<tr><td>'+i.astro+':</td><td>'+i.pts+'</td></tr>'
+			html += '<tr><td>'+i.astro.name+':</td><td>'+i.pts+'</td></tr>'
 		}
 		document.getElementById('scores').innerHTML = html
 	}
@@ -193,3 +191,50 @@ function generateBotPlayer(grid) {
 	}
 	return astro
 }
+
+function generateDisplay(grid) {
+	const display = {x: 0,y: 0}
+	display.refreshView = ()=>{
+		// Grid
+		for(let i=-DISPLAY_SIZE; i<=DISPLAY_SIZE; i++) {
+			for(let j=-DISPLAY_SIZE; j<=DISPLAY_SIZE; j++) {
+				const cell = document.getElementById(idOf(i,j)).classList
+				cell.remove(WALL)
+				cell.remove('astro0')
+				cell.remove('astro1')
+				cell.remove('astro2')
+				cell.remove('astro3')
+				cell.remove('coin')
+
+				const somethingOnCell = grid.getCell(display.x+i,display.y+j, true)
+				if(somethingOnCell)
+					cell.add(somethingOnCell)
+				if(grid.isCoinOn(display.x+i, display.y+j))
+					cell.add('coin')
+			}
+		}
+
+		// Score
+		let html = '<tr><th>Astro</th><th>Score</th>'
+		for(let i of grid.getScores().sort((a,b)=>b.pts-a.pts)) {
+			html += '<tr><td>'+i.astro.name+':</td><td>'+i.pts+'</td></tr>'
+		}
+		document.getElementById('scores').innerHTML = html
+	}
+
+	document.onkeydown = (e=window.event)=>{
+		switch(e.keyCode) {
+			case 37: display.x--; break; // left
+			case 38: display.y++; break; // up
+			case 39: display.x++; break; // right
+			case 40: display.y--; break; // down
+		}
+		setTimeout(display.refreshView,1)
+	};
+	setTimeout(display.refreshView,1)
+	return display
+}
+
+
+
+

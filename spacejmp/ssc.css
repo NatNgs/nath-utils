@@ -3,6 +3,7 @@
 	width: 30px;
 	height: 30px;
 }
+
 .wall {
 	border: 1px dotted white;
 	background-color: #000
@@ -25,16 +26,14 @@
 	background-size: cover;
 }
 
-.ownAlly {
-	background-color: #99FFCC;
+.coin {
+	background-image: url("coin.svg");
+	background-size: 50%;
+	background-repeat: no-repeat;
+	background-position: center;
 }
 
-.ownEnemy {
-	background-color: #FFAAAA;
-}
-
-
-#grid, #scores, .command {
+#grid, #scores, .commands {
 	border: 1px solid black;
 	border-collapse:collapse;
 }
