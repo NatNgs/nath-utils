@@ -1,5 +1,4 @@
 const MAP_SIZE = 15; // map size = Value×2+1 (-MAP_SIZE to MAP_SIZE)
-var DISPLAY_SIZE = 5; // grid view size = Value×2+1 (-gridSize to gridSize)
 const WALL_CHANCE = 0.25; // between 0 and 1
 const WALL = 'wall'; // css class
 const TIMEOUT = 1;
@@ -9,13 +8,13 @@ function idOf(x,y) {
 }
 
 function Grid() {
-	this.display = null;
 	this.astroCollide = true;
 	this.maxTurns = 0;
 	this.onEnd = null; // function
 	
 	const THIS = this;
 	const allAstros = [];
+	const allDisplays = [];
 	const walls = new Set();
 	const coins = new Set();
 	const score = new Map();
@@ -91,28 +90,30 @@ function Grid() {
 	 * If was possible, callback will return true, and then will not accept any more call to it (will return true indefinitelly)
 	 */
 	function turnA(whoNext) {
-		if(THIS.display)
-			THIS.display.refreshView()
 		if(whoNext.length <=0) {
 			setTimeout(THIS.launch, 0)
 			return
 		}
 
 		const curr = whoNext.shift()
+		
+		// Prepare callback
 		const next = () => {
 			if(THIS.isCoinOn(curr.x, curr.y)) {
 				coins.delete(idOf(curr.x, curr.y))
 				score.set(curr, score.get(curr)+1)
 				addNewCoin()
 			}
-			curr.refreshView()
 			setTimeout(()=>turnA(whoNext),TIMEOUT)
 		}
+
+		// Update displays
+		for(let display of allDisplays)
+			display.notifyUpdates()
 
 		if(curr.fly()) { // try to fly (true if done, false if not flying)
 			next()
 		} else {
-			curr.refreshView()
 			let secur = false // to avoid to play multiple times in the turn
 			curr.askForAction((action)=>{
 				if(secur)

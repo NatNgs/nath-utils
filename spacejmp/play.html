@@ -1,0 +1,31 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="styles/ssc.css">
+	<script src="scripts/board.js"></script>
+	<script src="scripts/astro.js"></script>
+	<script src="scripts/mainPlay.js"></script>
+</head>
+<body onLoad="init()">
+
+	<table>
+		<tr>
+			<td>
+				<table id="grid">
+				</table>
+			</td>
+			<td>
+				<table id="scores">
+				</table>
+			</td>
+		</tr>
+	</table>
+	<br/>
+	<table class="commands">
+		<tr><td><div class='kbd'>⇦</div>/<div class='kbd'>⇧</div>/<div class='kbd'>⇨</div>/<div class='kbd'>⇩</div>:</td><td>Walk/Jump</td></tr>
+		<tr><td><div class='kbd'>Shift</div>+<div class='kbd'>⇦</div>/<div class='kbd'>⇨</div>:</td><td>Rotate</td></tr>
+		<tr><td><div class='kbd'>Shift</div>+<div class='kbd'>⇩</div>:</td><td>Wait</td></tr>
+	</table>
+
+</body>
+</html>

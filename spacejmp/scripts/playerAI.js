@@ -10,12 +10,11 @@ const memSize = 32; // Resent to itself at each computation
 //const comSize = 32; // To talk to others players
 
 /*
- 1. can move (or is Flying)
  7. Next wall/player distance (left, up, right, left-up, right-up, down left, down right)
  8. is Wall or Player (down, up, left, right, up-left, up-right, down-left, down-right)
  7. Next coin distance (left, up, right, left-up, right-up, down left, down right)
 */
-const inputs = 23 + memSize //+ comSize;
+const inputs = 22 + memSize //+ comSize;
 
 /*
  1. Wait
@@ -47,7 +46,6 @@ function Genetic(inheritance) {
 	
 	/*
 	 input = {
-		input.canMove: boolean
 		input.dist_left: int >=0
 		input.dist_right: int >=0
 		input.dist_up: int >=0
@@ -82,7 +80,6 @@ function Genetic(inheritance) {
 	this.buildOutput = function(input, memory/*, communication*/) {
 		// Building input
 		const inpt = [
-			input.canMove ? 1 : -1,
 			input.dist_left  ? 1/input.dist_left  : -1,
 			input.dist_right ? 1/input.dist_right : -1,
 			input.dist_up    ? 1/input.dist_up    : -1,
@@ -237,9 +234,7 @@ function relativeXY(rot,x,y) {
 function generateAIPlayer(grid) {
 	const astro = new Astro(grid);
 	astro.gen = new Genetic();
-	const input = {
-		canMove: true // bypass: do not do first learning
-	}
+	const input = {}
 	let memory = []
 	for(let i=0;i<memSize;i++)
 		memory.push(0)
@@ -282,15 +277,7 @@ function generateAIPlayer(grid) {
 		return [dist, isPlayer, coin];
 	}
 	
-	astro.refreshView = ()=>{
-		if(!input.canMove) {
-			// last was refreshView: was flying
-			// refresh personnal memory and communication
-			const out = astro.gen.buildOutput(input, memory/*, comm*/);
-			memory = out.mem;
-		}
-		input.canMove = false
-
+	astro.askForAction = (cb)=>{
 		let mv =relativeXY(astro.rot,0,-1)
 		input.isPlayer_down = (''+grid.getCell(astro.x+mv[0], astro.y+mv[1])).startsWith('astro')
 		
@@ -330,12 +317,6 @@ function generateAIPlayer(grid) {
 		input.isPlayer_dr = found.shift()
 		input.coin_dr = found.shift()
 		
-		// update communication to others here
-		// update 'comm' from others communications here
-	}
-	
-	astro.askForAction = (cb)=>{
-		input.canMove = true;
 		const out = astro.gen.buildOutput(input, memory/*, comm*/);
 		memory = out.mem;
 		
