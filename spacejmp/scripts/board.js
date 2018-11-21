@@ -1,24 +1,36 @@
-const MAP_SIZE = 15; // map size = Value×2+1 (-MAP_SIZE to MAP_SIZE)
-const WALL_CHANCE = 0.25; // between 0 and 1
-const WALL = 'wall'; // css class
-const TIMEOUT = 1;
-
-function idOf(x,y) {
-	return 'c'+x+'_'+y;
+const ASTRO = 'astro' // should be the same as css class (without the orientation digit at end)
+const WALL = 'wall' // should be the same as css class
+const COIN = 'coin' // should be the same as css class
+const mapActionToCode = {
+	'wait':-1,
+	'mv_u': 1,
+	'mv_l': 2,
+	'mv_d': 3,
+	'mv_r': 4,
+	'rt_l': 5,
+	'rt_r': 6
 }
 
-function Grid() {
-	this.astroCollide = true;
-	this.maxTurns = 0;
-	this.onEnd = null; // function
-	
-	const THIS = this;
-	const allAstros = [];
-	const allDisplays = [];
-	const walls = new Set();
-	const coins = new Set();
-	const score = new Map();
-	let currTurn = 0;
+
+function idOf(x,y) {
+	return 'c'+x+'_'+y
+}
+
+function Board() {
+	const THIS = this
+
+	this.size = 15 // map size = Value×2+1 (-this.size to this.size)
+	this.wallChance = 0.25 // between 0 and 1
+	this.astroCollide = true
+	this.maxTurns = 0
+	this.onEnd = null // function
+
+	const allAstros = []
+	const observers = []
+	const walls = new Set()
+	const coins = new Set()
+	const score = new Map()
+	let currTurn = 0
 
 	// // // Public functions
 	this.launch = function() {
@@ -32,9 +44,6 @@ function Grid() {
 		}
 	}
 
-	this.isCoinOn = function(x,y) {
-		return coins.has(idOf(x,y))
-	}
 	this.getScores = function() {
 		const ret = []
 		for(let e of score.entries())
@@ -49,18 +58,51 @@ function Grid() {
 		// keep the walls
 		// keep display
 		// keep onEnd method
-		// keep maxTurns
-		// keep astroCollide
 	}
-	
-	this.getCell = function(x,y,seeAll) {
+	this.resetHARD = function() {
+		/// Clear all
+		while(allAstros.shift());
+		while(observers.shift());
+		walls.clear()
+		this.onEnd = null
+
+		/// Regenerate walls
+		// Random walls
+		for(let i=-this.size; i<this.size; i++)
+			for(let j=-this.size; j<this.size; j++)
+				if(Math.random() < this.wallChance)
+					walls.add(idOf(i,j))
+
+		// world border
+		for(let i=-this.size+1; i<this.size; i++) {
+			walls.add(idOf(i, -this.size))
+			walls.add(idOf(i, this.size))
+			walls.add(idOf(-this.size, i))
+			walls.add(idOf(this.size, i))
+		}
+		this.reset()
+	}
+
+	/**
+	 * @param x, y, flags
+	 * flags&1 = Walls >> returns constant WALL
+	 * flags&2 = Players >> returns constant ASTRO + [0-3] (orientation)
+	 * flags&4 = Coins >> returns constant COIN
+	 * else return false
+	 */
+	this.getCell = function(x,y,flags) {
 		const id = idOf(x,y)
-		if(walls.has(id))
-			return WALL;
-		if(seeAll || this.astroCollide)
+		if(flags&1 && walls.has(id))
+			return WALL
+
+		if(flags&2)
 			for(astro of allAstros)
 				if(astro.x === x && astro.y === y)
-					return 'astro'+astro.rot;
+					return ASTRO+astro.rot
+
+		if(flags&4 && coins.has(idOf(x,y)))
+			return COIN
+
 		return false;
 	}
 
@@ -68,7 +110,18 @@ function Grid() {
 		allAstros.push(astro)
 		score.set(astro, 0)
 		for(let i=0; i<5; i++)
-			addNewCoin()
+			addNewCoin(this)
+	}
+
+	this.addObserver = function(newObserver) {
+		observers.push(newObserver)
+	}
+	this.remObserver = function(newObserver) {
+		let i=observers.indexOf(newObserver)
+		if(i===observers.length)
+			observers.pop()
+		else if(i)
+			observers[i] = observers.pop();
 	}
 
 	// // // Private Functions
@@ -89,73 +142,55 @@ function Grid() {
 	 * callback will return false and wait for another choice.
 	 * If was possible, callback will return true, and then will not accept any more call to it (will return true indefinitelly)
 	 */
-	function turnA(whoNext) {
+	const turnA = function(whoNext) {
 		if(whoNext.length <=0) {
-			setTimeout(THIS.launch, 0)
+			setTimeout(THIS.launch, 200)
 			return
 		}
 
 		const curr = whoNext.shift()
-		
+
 		// Prepare callback
 		const next = () => {
-			if(THIS.isCoinOn(curr.x, curr.y)) {
+			if(THIS.getCell(curr.x, curr.y, 0b100)) {
 				coins.delete(idOf(curr.x, curr.y))
 				score.set(curr, score.get(curr)+1)
-				addNewCoin()
+				addNewCoin(this)
 			}
-			setTimeout(()=>turnA(whoNext),TIMEOUT)
+			setTimeout(()=>turnA(whoNext), 0)
 		}
 
 		// Update displays
-		for(let display of allDisplays)
+		for(let display of observers)
 			display.notifyUpdates()
 
 		if(curr.fly()) { // try to fly (true if done, false if not flying)
 			next()
 		} else {
-			let secur = false // to avoid to play multiple times in the turn
-			curr.askForAction((action)=>{
-				if(secur)
-					return true // turn was already done
-				secur = true
-				//console.log(curr.name, 'played', action)
+			curr.askForAction((actionName)=>{
+				const action = mapActionToCode[actionName]
 
-				if(action !== -1 // WAIT cmd
-				  && (action < 0 || action > 5 // command out of bounds
-				   || (action < 4 && !curr.move(action)) // MOVE command
-				   || (action >= 4 && !curr.diag(action-4)))) // DIAG command
-						return (secur = false) // cannot do this move
+				if(!action // command out of bounds
+				   || (action >= 1 && action <= 4 && !curr.move(action-1)) // MOVE command
+				   || (action >= 5 && action <= 6 && !curr.diag(action-5))) // DIAG command
+					return false // cannot do this move
 
+				// console.log(curr.name, 'did', actionName)
 				next()
 				return true
 			})
 		}
 	}
-
-	function addNewCoin() {
-		let newX, newY;
-		do { 
-			newX = ((Math.random()*MAP_SIZE*2-1)-MAP_SIZE+1)|0
-			newY = ((Math.random()*MAP_SIZE*2-1)-MAP_SIZE+1)|0
-		} while(THIS.getCell(newX,newY) || THIS.isCoinOn(newX, newY));
+	const addNewCoin = function() {
+		let newX
+		let newY
+		do {
+			newX = ((Math.random()*THIS.size*2-1)-THIS.size+1)|0
+			newY = ((Math.random()*THIS.size*2-1)-THIS.size+1)|0
+		} while(THIS.getCell(newX,newY,0b111));
 		coins.add(idOf(newX, newY))
 	}
-	
-	// // // Init
-	// Random walls
-	for(let i=-MAP_SIZE; i<MAP_SIZE; i++)
-		for(let j=-MAP_SIZE; j<MAP_SIZE; j++)
-			if(Math.random() < WALL_CHANCE)
-				walls.add(idOf(i,j))
 
-	// world border
-	for(let i=-MAP_SIZE+1; i<MAP_SIZE; i++) {
-		walls.add(idOf(i, -MAP_SIZE))
-		walls.add(idOf(i, MAP_SIZE))
-		walls.add(idOf(-MAP_SIZE, i))
-		walls.add(idOf(MAP_SIZE, i))
-	}
-		
-	this.reset()
+	// // // Init
+	this.resetHARD()
 }
