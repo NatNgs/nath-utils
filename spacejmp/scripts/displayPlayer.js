@@ -18,12 +18,12 @@ function m(dist,xy,val) {
 	cell.classList.add(val)
 }
 
-function PlayerDisplay(grid, player) {
+function PlayerDisplay(board, player) {
 	this.halfWidth = 7 // Value×2+1
 	this.halfHeight = 5 // Value×2+1
 
 	player.addObserver(this)
-	grid.addObserver(this)
+	board.addObserver(this)
 
 	this.notifyUpdates = function() {
 		// Grid
@@ -63,15 +63,16 @@ function PlayerDisplay(grid, player) {
 					m(i, or, 'c_off')
 		}
 
-		const centerCell = document.getElementById(idOf(0,0)).classList
+		const centerCell = document.getElementById(idOf(0,0))
+		centerCell.innerHTML = player.getAstroName()
 		for(let i=3;i>=0;--i)
-			centerCell.remove(ASTRO+i)
-		centerCell.add(ASTRO+player.getRotation())
+			centerCell.classList.remove(ASTRO+i)
+		centerCell.classList.add(ASTRO+player.getRotation())
 
 		// Score
 		let html = '<tr><th>Astro</th><th>Score</th>'
-		for(let i of grid.getScores().sort((a,b)=>b.pts-a.pts))
-			html += '<tr><td>'+i.astro.name+':</td><td>'+i.pts+'</td></tr>'
+		for(let i of board.getScores().sort((a,b)=>b.pts-a.pts))
+			html += '<tr><td>'+i.name+':</td><td>'+i.pts+'</td></tr>'
 
 		document.getElementById('scores').innerHTML = html
 	}
@@ -85,5 +86,14 @@ function PlayerDisplay(grid, player) {
 			html += '</tr>'
 		}
 		return html;
+	}
+
+	this.changePlayer = function(newPlayer) {
+		if(player === newPlayer)
+			return;
+		player.remObserver(this)
+		player = newPlayer
+		player.addObserver(this)
+		console.log('Displaying', player.getAstroName())
 	}
 }

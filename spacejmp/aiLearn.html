@@ -1,10 +1,12 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<link rel="stylesheet" href="styles/ssc.css">
+	<link rel="stylesheet" href="styles/learn.css">
 	<script src="scripts/board.js"></script>
 	<script src="scripts/astro.js"></script>
-	<script src="scripts/ai.js"></script>
+	<script src="scripts/playerInterface.js"></script>
+	<script src="scripts/displayPlayer.js"></script>
+	<script src="scripts/playerAI.js"></script>
 	<script src="scripts/mainLearn.js"></script>
 </head>
 <body onLoad="init()">
@@ -12,7 +14,7 @@
 	<table>
 		<tr>
 			<td>
-				<table id="grid">
+				<table id="board">
 				</table>
 			</td>
 			<td>
@@ -29,7 +31,7 @@
 	<br/>
 
 	<textarea style="word-wrap:break-word; word-break:break-all;" id="save"value=""></textarea>
-	<button onclick='launch()'>Validate and Launch</button>
+	<button onclick='launch()'>Load and Launch</button>
 	<p>Continue automatically: <input id='continue' type='checkbox' /></p>
 	
 </body>

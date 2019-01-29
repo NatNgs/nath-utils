@@ -19,11 +19,13 @@ function idOf(x,y) {
 function Board() {
 	const THIS = this
 
-	this.size = 15 // map size = Value×2+1 (-this.size to this.size)
+	this.size = 10 // map size = Value×2+1 (-this.size to this.size)
 	this.wallChance = 0.25 // between 0 and 1
 	this.astroCollide = true
 	this.maxTurns = 0
 	this.onEnd = null // function
+	this.turnDuration = 200
+	this.coinsNumber = 20
 
 	const allAstros = []
 	const observers = []
@@ -35,7 +37,6 @@ function Board() {
 	// // // Public functions
 	this.launch = function() {
 		if(THIS.maxTurns > 0 && currTurn >= THIS.maxTurns) {
-			currTurn = 0
 			if(THIS.onEnd)
 				THIS.onEnd()
 		} else {
@@ -47,17 +48,21 @@ function Board() {
 	this.getScores = function() {
 		const ret = []
 		for(let e of score.entries())
-			ret.push({astro:e[0], pts:e[1]})
+			ret.push({name:e[0].name, pts:e[1]})
 		return ret
 	}
 	this.reset = function() {
-		while(allAstros.shift());
 		score.clear()
 		coins.clear()
 		currTurn = 0;
-		// keep the walls
-		// keep display
-		// keep onEnd method
+		
+		const copyAstro = [...allAstros]
+		while(allAstros.shift());
+		let astro
+		while(astro = copyAstro.pop())
+			this.addAstro(astro)
+		for(let i=this.coinsNumber; i>0; --i)
+			addNewCoin(this)
 	}
 	this.resetHARD = function() {
 		/// Clear all
@@ -95,7 +100,7 @@ function Board() {
 		if(flags&1 && walls.has(id))
 			return WALL
 
-		if(flags&2)
+		if(flags&2 && this.astroCollide)
 			for(astro of allAstros)
 				if(astro.x === x && astro.y === y)
 					return ASTRO+astro.rot
@@ -109,8 +114,6 @@ function Board() {
 	this.addAstro = function(astro) {
 		allAstros.push(astro)
 		score.set(astro, 0)
-		for(let i=0; i<5; i++)
-			addNewCoin(this)
 	}
 
 	this.addObserver = function(newObserver) {
@@ -124,6 +127,14 @@ function Board() {
 			observers[i] = observers.pop();
 	}
 
+	this.allPlayersToSamePosition = function() {
+		const choice = allAstros[(Math.random()*allAstros.length)|0]
+		for(let i=allAstros.length-1; i>=0; --i) {
+			allAstros[i].x = choice.x;
+			allAstros[i].y = choice.y;
+		}
+	}
+	
 	// // // Private Functions
 	/**
 	 * Ask next player to choose an action
@@ -144,7 +155,7 @@ function Board() {
 	 */
 	const turnA = function(whoNext) {
 		if(whoNext.length <=0) {
-			setTimeout(THIS.launch, 200)
+			setTimeout(THIS.launch, THIS.turnDuration)
 			return
 		}
 

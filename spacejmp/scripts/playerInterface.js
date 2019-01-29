@@ -23,6 +23,12 @@ function Player(grid) {
 	grid.addAstro(astro)
 
 	// Public functions
+	this.getAstroName = function() {
+		return astro.name
+	}
+	this.setAstroName = function(name) {
+		astro.name = name
+	}
 	this.getSurroundings = function() {
 		return {
 			//  distance to next [wall, player, playerRotation, coin, beginHidden]
