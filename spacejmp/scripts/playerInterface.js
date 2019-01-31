@@ -1,34 +1,34 @@
-const MAX_DIST = 32
+const MAX_DIST = 32;
 
-function Player(grid) {
-	const THIS = this
-	const observers = []
-	let action = undefined
+let pid = 0;
+function Player() {
+	const THIS = this;
+	const observers = [];
 
-	// Define Astro
-	const astro = new Astro(grid)
-	astro.askForAction = (cb)=>{
-		// prepare to get player response
-		action = cb
+	this.name = undefined;
 
-		// Update displays
-		for(let o of observers)
-			o.notifyUpdates()
-
-		// call player to play
-		THIS.onAskForAction()
-	}
-
-	// Register astro to grid
-	grid.addAstro(astro)
+	let action = undefined;
+	let astro = undefined;
+	let board = undefined;
 
 	// Public functions
-	this.getAstroName = function() {
-		return astro.name
-	}
-	this.setAstroName = function(name) {
-		astro.name = name
-	}
+	this.setAstro = function(b, a) {
+		board = b;
+		astro = a;
+		astro.name = this.name || (this.name = 'Player'+(++pid));
+		astro.askForAction = (cb)=>{
+			// prepare to get player response
+			action = cb;
+
+			// Update displays
+			for(let o of observers)
+				o.notifyUpdates();
+
+			// call player to play
+			THIS.onAskForAction()
+		};
+	};
+
 	this.getSurroundings = function() {
 		return {
 			//  distance to next [wall, player, playerRotation, coin, beginHidden]
@@ -41,10 +41,10 @@ function Player(grid) {
 			dl: findNext(-1,-1),
 			dr: findNext( 1,-1)
 		}
-	}
+	};
 	this.getRotation = function() {
 		return astro.rot
-	}
+	};
 
 	// return true if successful, false if should try again
 	this.doAction = function(actionCode) {
@@ -53,62 +53,62 @@ function Player(grid) {
 			return true
 		}
 		return false
-	}
+	};
 
 	/** Set your own !
 	 * Default implementation is Random play
 	 */
 	this.onAskForAction = ()=>{
-		const moves = ['wait','mv_u','mv_d','mv_l','mv_r','rt_l','rt_r']
+		const moves = ['wait','mv_u','mv_d','mv_l','mv_r','rt_l','rt_r'];
 		while(!this.doAction(moves[(Math.random()*moves.length)|0]));
-	}
+	};
 
 	this.addObserver = function(newObserver) {
 		observers.push(newObserver)
-	}
+	};
 	this.remObserver = function(newObserver) {
-		let i=observers.indexOf(newObserver)
+		let i=observers.indexOf(newObserver);
 		if(i===observers.length)
-			observers.pop()
+			observers.pop();
 		else if(i)
 			observers[i] = observers.pop();
-	}
+	};
 
 	const findNext = function(mvx,mvy) {
-		let x = astro.x
-		let y = astro.y
-		let wall = 0
-		let player = 0
-		let prot = 0
-		let coin = 0
-		let hidden = 0
-		let count = 0
+		let x = astro.x;
+		let y = astro.y;
+		let wall = 0;
+		let player = 0;
+		let prot = 0;
+		let coin = 0;
+		let hidden = 0;
+		let count = 0;
 
 		// can see walls and players behind coins
 		// can see coin behind players
 		// cant see coins behind walls > 0
 		while(count < MAX_DIST) {
-			x += mvx
-			y += mvy
-			count ++
+			x += mvx;
+			y += mvy;
+			count ++;
 
 			if(mvx && mvy) {// only for diagonals
-				if(grid.getCell(x-mvx,y,0b001) && grid.getCell(x,y-mvy,0b001)) {
-					hidden = count
+				if(board.getCell(x-mvx,y,0b001) && board.getCell(x,y-mvy,0b001)) {
+					hidden = count;
 					break
 				}
 			}
 
-			if(!coin && grid.getCell(x,y,0b100)) {
+			if(!coin && board.getCell(x,y,0b100)) {
 				coin = count
 			} else if(!player) {
-				const astro = grid.getCell(x,y,0b010)
+				const astro = board.getCell(x,y,0b010);
 				if(astro) {
-					player = count
+					player = count;
 					prot = astro
-				} else if(grid.getCell(x,y,0b001)) {
-					wall = count
-					hidden = count+1
+				} else if(board.getCell(x,y,0b001)) {
+					wall = count;
+					hidden = count+1;
 					break
 				}
 			}

@@ -1,20 +1,38 @@
 function init() {
-	const board = new Board()
+	// 1- new Board()
+	const board = new Board();
+
+	/* 2- Setup params (if need others than default values)
+    * 	board.size (int strictly positive)
+    * 	board.wallChance (float between 0 and 1 excluded)
+    * 	board.astroCollide (boolean)
+    * 	board.maxTurns (int strictly positive, or 0 to set infinity)
+    * 	board.onEnd (callback function)
+    * 	board.coinsCount (int positive or 0)
+    */
+
+	// 3- call board.reset([seed]) to initiate the board
+	board.reset();
+
+	/* 4- call how many time needed:
+    * 	board.addPlayer(astro)
+    * 	board.addObserver(observer)
+    */
 
 	// create human player and link display
-	const htmlDisplay = document.getElementById('board')
+	const p = generateManPlayer();
+	board.addPlayer(p);
 
-	const p = generateManPlayer(board)
-	const display = new PlayerDisplay(board, p)
-	htmlDisplay.innerHTML = display.getHtml()
+	const display = new PlayerDisplay(board, p);
+	document.getElementById('board').innerHTML = display.getHtml();
 
 	// Generate random bot players
 	for(let i=5; i>=0; --i)
-		new Player(board)
+		board.addPlayer(new Player());
 
+	// 5- call board.launch() !
 	board.launch()
 }
-
 
 
 const keyMap = {
@@ -25,13 +43,13 @@ const keyMap = {
 	'39s':'rt_r', // rotate right
 	'40' :'mv_d', // move down
 	'40s':'wait'  // wait
-}
-function generateManPlayer(grid) {
-	const p = new Player(grid)
+};
+function generateManPlayer() {
+	const p = new Player();
 
 	// Set keyboard actions
-	let shift = false
-	let call = false
+	let shift = false;
+	let call = false;
 
 	document.onkeydown = (e=window.event)=>{
 		if(e.keyCode === 16) {
@@ -39,14 +57,14 @@ function generateManPlayer(grid) {
 		} else if(call && p.doAction(keyMap[e.keyCode+(shift?'s':'')])) {
 			call = false
 		}
-	}
+	};
 	document.onkeyup = (e=window.event)=>{
 		if(e.keyCode === 16)
 			shift = false
-	}
+	};
 
 	p.onAskForAction = ()=>{
-		console.log('Asking for player action')
+		console.log('Asking for player action');
 		call = true
 	};
 	return p
