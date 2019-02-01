@@ -1,168 +1,206 @@
 <html>
 <head>
-	<title>AI Fast Learning</title>
-	<meta charset="UTF-8">
-	<link rel="stylesheet" href="styles/learn.css">
-	<script src="scripts/board.js"></script>
-	<script src="scripts/astro.js"></script>
-	<script src="scripts/playerInterface.js"></script>
-	<script src="scripts/displayPlayer.js"></script>
-	<script src="scripts/playerAI.js"></script>
-	<script src="scripts/mainLearn.js"></script>
-	<script src="scripts/pseudorand.js"></script>
-	<script>
-		const players = {};
+    <title>AI Fast Learning</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles/learn.css">
+    <script src="scripts/board.js"></script>
+    <script src="scripts/astro.js"></script>
+    <script src="scripts/playerInterface.js"></script>
+    <script src="scripts/displayPlayer.js"></script>
+    <script src="scripts/playerAI.js"></script>
+    <script src="scripts/mainLearn.js"></script>
+    <script src="scripts/pseudorand.js"></script>
+    <script>
+		const players = {}
+		let when = 0
 		const params = {
-			players:[],
-			display:null,
+			players: [],
+			display: null,
 			onEnd: () => {
-				// TODO
-				/*
+				when++
+
 				// Sort astro by points (coins)
-				const scores = board.getScores().map(a=>{
-					let p = {
-						player: getByName(a.name),
-						name: a.name,
-						pts: a.pts,
-					};
-					p.wm = p.player.wrongMoves;
-					p.when = p.player.when;
-					p.player.wrongMoves = 0;
-					return p;
-				}).sort((a,b)=>a.pts!==b.pts
-						?b.pts-a.pts
-						:(a.when!==b.when
-										?b.when-a.when
-										:a.wm-b.wm
-						)
-				);
-
-				display.changePlayer(scores[0].player);
-
-				// print best score
-				document.getElementById('save').value = scores[0].player.gen.export();
+				const scores = board.getScores().map(a => {
+					let p = getByName(a.name)
+					p.pts = a.pts
+					p.wm = p.wrongMoves
+					p.wrongMoves = 0
+					return p
+				}).sort((a, b) => a.pts !== b.pts
+					? b.pts - a.pts
+					: (a.when !== b.when
+							? b.when - a.when
+							: a.wm - b.wm
+					),
+				)
 
 				// Replace worst AI by new Genetic from first(s)
-				while(scores.length >= 2) {
+				while (scores.length >= 2) {
 					// Take first (or firsts if same amount of points)
-					const bests = [];
-					const limPts = scores[0].pts;
-					let newName = 'AI'+astroName;
-					while(scores.length>0 && scores[0].pts >= limPts) {
-						const astro = scores.shift().astro;
-						newName += (bests.length===0?'(':',')+astro.name.match(/[0-9]+/g)[0];
-						bests.push(astro.gen.genes)
+					const bests = []
+					const limPts = scores[0].pts
+					while (scores.length > 0 && scores[0].pts >= limPts) {
+						const p = getByName(scores.shift().name)
+						bests.push(p.gen.genes)
 					}
 
-					if(scores.length > 0) {
-						const astro = scores.pop().astro;
-						astro.gen = new Genetic(bests);
-						astro.name = newName+')';
-						astro.when = when;
-						astroName++
+					if (scores.length > 0) {
+						const p = getByName(scores.pop().name)
+						p.gen = new Genetic(bests)
+						p.when = when
+						document.getElementById(p.name + '-inpt').value = p.gen.export()
+						document.getElementById(p.name + '-when').innerText = p.when
 					}
 				}
 
-				if(!document.getElementById('checkToStop').checked) {
-					setTimeout(relaunch,10)
-				}*/
+				const checkEnd = document.getElementById('checkToStop')
+				const inptSeed = document.getElementById('seed')
+				if (!checkEnd.checked) {
+					inptSeed.value = (board.seed = (inptSeed.value | 0))
+					setTimeout(relaunch, 10)
+				} else {
+					checkEnd.checked = false
+					for (let e of document.getElementsByClassName('disableOnRun')) {
+						e.disabled = undefined
+					}
+				}
 			},
-		};
+		}
 
-		let nextPid = 0;
+		let nextPid = 0
+
 		function addPlayer() {
-			const div = document.createElement('div');
-			const id = ++nextPid;
-			div.id = 'P'+id;
-			div.innerHTML= `\
-<label for="P${id}-inpt">P${id}</label>\
-<input id="P${id}-inpt" type="text" value="" placeholder="[Random]" onChange="updatePlayer('P${id}')">
-<button onclick="rmPlayer('P${id}')">-</button>`;
-			document.getElementById('playerList').appendChild(div);
-			players['P'+id] = '';
+			const div = document.createElement('div')
+			const id = 'P' + (++nextPid)
+			div.id = id
+			div.innerHTML = `\
+<label for="${id}-inpt">${id}</label>\
+<input id="${id}-inpt" type="text" value="" placeholder="[Random]" class="disableOnRun" onChange="updatePlayer('${id}')">\
+<button onclick="rmPlayer('${id}')" class="disableOnRun">-</button>\
+<span>Since</span> <span id="${id}-when">${when}</span>`
+			document.getElementById('playerList').appendChild(div)
+			players[id] = ''
 		}
 
 		function updatePlayer(id) {
-			const inpt = document.getElementById(id+'-inpt');
-			if(inpt && players[id]) {
-				players[id] = inpt.value;
+			const inpt = document.getElementById(id + '-inpt')
+			if (inpt && players[id] && players[id] !== inpt.value) {
+				players[id] = inpt.value
 			}
 		}
 
 		function rmPlayer(id) {
 			// Removing div from the page
-			const div = document.getElementById(id);
-			div.parentNode.removeChild(div);
-			delete players[id];
+			const div = document.getElementById(id)
+			div.parentNode.removeChild(div)
+			delete players[id]
 		}
 
 
 		function clickValidate() {
-			// Generate players
-			params.players = [];
-			let error = false;
-			for(let pid in players) {
-				const p = players[pid];
-				const i = params.players.length;
-				params.players[i] = generateAIPlayer();
-				params.players[i].name = pid;
-				params.players[i].when = 0;
+			for (let e of document.getElementsByClassName('disableOnRun')) {
+				e.disabled = true
+			}
 
-				if(p.length > 100) {
+
+			// Generate players
+			params.players = []
+			let error = false
+			for (let pid in players) {
+				const p = players[pid]
+				const i = params.players.length
+				params.players[i] = generateAIPlayer()
+				params.players[i].name = pid
+				params.players[i].when = 0
+
+				if (p.length > 100) {
 					try {
 						params.players[i].gen.import(p)
-					} catch(e){
-						document.getElementById(pid+'-inpt').value = e;
-						error = true;
+					} catch (e) {
+						document.getElementById(pid + '-inpt').value = e
+						error = true
 					}
+				} else {
+					document.getElementById(pid + '-inpt').value = params.players[i].gen.export()
 				}
 			}
 
-			if(error)
-				return;
+			if (error)
+				return
 
-			params.display = new PlayerDisplay(board, params.players[0]);
-			document.getElementById('board').innerHTML = params.display.getHtml();
+			params.display = new PlayerDisplay(board)
+			document.getElementById('board').innerHTML = params.display.getHtml()
 
-			onValidateSettings(params);
-
+			onValidateSettings(params)
 		}
 
-	</script>
+    </script>
 </head>
 <body>
 
-	<table>
-		<tr>
-			<td>
-				<table id="board">
-				</table>
-			</td>
-			<td>
-				<table id="scores">
-				</table> <br/>
-					<table class="commands">
-					<tr><td><div class='kbd'>⇦</div>/<div class='kbd'>⇧</div>/<div class='kbd'>⇨</div>/<div class='kbd'>⇩</div>:</td><td>Walk/Jump</td></tr>
-					<tr><td><div class='kbd'>Shift</div>+<div class='kbd'>⇦</div>/<div class='kbd'>⇨</div>:</td><td>Rotate</td></tr>
-					<tr><td><div class='kbd'>Shift</div>+<div class='kbd'>⇩</div>:</td><td>Wait</td></tr>
-				</table>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<label for='checkToStop'>Stop after next:</label><input id='checkToStop' type='checkbox' />
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<div id="playerList"></div>
-				<!-- Todo: disable buttons when learning -->
-				<button onclick="addPlayer()">+</button>
-				<button onclick="clickValidate()">Validate and Launch</button>
-			</td>
-		</tr>
-	</table>
-	<br/>
+<table>
+    <tr>
+        <td>
+            <table id="board">
+            </table>
+        </td>
+        <td>
+            <table id="scores">
+            </table>
+            <br/>
+            <table class="commands">
+                <tr>
+                    <td>
+                        <div class='kbd'>⇦</div>
+                        /
+                        <div class='kbd'>⇧</div>
+                        /
+                        <div class='kbd'>⇨</div>
+                        /
+                        <div class='kbd'>⇩</div>
+                        :
+                    </td>
+                    <td>Walk/Jump</td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class='kbd'>Shift</div>
+                        +
+                        <div class='kbd'>⇦</div>
+                        /
+                        <div class='kbd'>⇨</div>
+                        :
+                    </td>
+                    <td>Rotate</td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class='kbd'>Shift</div>
+                        +
+                        <div class='kbd'>⇩</div>
+                        :
+                    </td>
+                    <td>Wait</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for='checkToStop'>Stop after next:</label><input id='checkToStop' type='checkbox'/>
+            <label for='seed'>Random Seed:</label><input id='seed' type='number' value='42'/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="playerList"></div>
+            <!-- Todo: disable buttons when learning -->
+            <button onclick="addPlayer()" class="disableOnRun">+</button>
+            <button onclick="clickValidate()" class="disableOnRun">Validate and Launch</button>
+        </td>
+    </tr>
+</table>
+<br/>
 
 </body>
 </html>

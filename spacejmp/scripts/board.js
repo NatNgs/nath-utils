@@ -1,19 +1,13 @@
-const ASTRO = 'astro'; // should be the same as css class (without the orientation digit at end)
-const WALL = 'wall'; // should be the same as css class
-const COIN = 'coin'; // should be the same as css class
+const ASTRO = 'astro' // should be the same as css class (without the orientation digit at end)
+const WALL = 'wall' // should be the same as css class
+const COIN = 'coin' // should be the same as css class
 const mapActionToCode = {
-	'wait':-1,
-	'mv_u': 1,
-	'mv_l': 2,
-	'mv_d': 3,
-	'mv_r': 4,
-	'rt_l': 5,
-	'rt_r': 6
-};
+	'wait': -1, 'mv_u': 1, 'mv_l': 2, 'mv_d': 3, 'mv_r': 4, 'rt_l': 5, 'rt_r': 6,
+}
 
 
-function idOf(x,y) {
-	return 'c'+x+'_'+y
+function idOf(x, y) {
+	return 'c' + x + '_' + y
 }
 
 /**
@@ -21,94 +15,102 @@ function idOf(x,y) {
  * 1- new Board()
  *
  * 2- Setup params (if need others than default values)
- * 	board.size (int strictly positive)
- * 	board.wallChance (float between 0 and 1 excluded)
- * 	board.astroCollide (boolean)
- * 	board.maxTurns (int strictly positive, or 0 to set infinity)
- * 	board.onEnd (callback function)
- * 	board.coinsNumber (int positive or 0)
+ *     - board.size (int strictly positive)
+ *     - board.wallChance (float between 0 and 1 excluded)
+ *     - board.astroCollide (boolean)
+ *     - board.startsAtSameLocation (boolean, useless if astoCollide true)
+ *     - board.maxTurns (int strictly positive, or 0 to set infinity)
+ *     - board.onEnd (callback function)
+ *     - board.coinsNumber (int positive or 0)
+ *     - board.seed (int, for random numbers)
  *
- * 3- call board.reset([seed]) to initiate the board
+ * 3- call board.reset() to initiate the board
  *
  * 4- call how many time needed:
- * 	board.addAstro(astro)
- * 	board.addObserver(observer)
+ *     - board.addPlayer(player)
+ *     - board.addObserver(observer)
  *
  * 5- call board.launch() !
  *
  * 6- redo from point 2 (setup params) as you want
  */
 function Board() {
-	const THIS = this;
+	const THIS = this
 
-	this.size = 15; // map size = Value×2+1 (-this.size to this.size)
-	this.wallChance = 0.25;
-	this.astroCollide = true;
-	this.maxTurns = 0; // lower than 1 means infinity
-	this.coinsNumber = 20;
-	this.onEnd = null; // function
-	this.startsAtSameLocation = false; // need astroCollide = true
-	this.seed = 0;
+	this.size = 15 // map size = Value×2+1 (-this.size to this.size)
+	this.wallChance = 0.25
+	this.astroCollide = true
+	this.maxTurns = 0 // lower than 1 means infinity
+	this.coinsNumber = 20
+	this.onEnd = null // function
+	this.startsAtSameLocation = false // need astroCollide = true
+	this.seed = 0
 
-	const allAstros = [];
-	const observers = [];
-	const walls = new Set();
-	const coins = new Set();
-	const score = new Map();
+	const allPlayers = []
+	const allAstros = []
+	const observers = []
+	const walls = new Set()
+	const coins = new Set()
+	const score = new Map()
 
-	let currTurn;
-	let rnd;
+	let currTurn
+	let rnd
 
 	// // // Public functions
-	this.launch = function() {
-		if(THIS.maxTurns > 0 && currTurn >= THIS.maxTurns) {
-			currTurn = 0;
-			if(THIS.onEnd)
-				THIS.onEnd()
+	this.launch = function () {
+		if (THIS.maxTurns > 0 && currTurn >= THIS.maxTurns) {
+			currTurn = 0
+			if (THIS.onEnd) THIS.onEnd()
 		} else {
-			currTurn++;
+			currTurn++
 			turnA([...allAstros])
 		}
-	};
+	}
 
-	this.getScores = function() {
-		const ret = [];
-		for(let e of score.entries())
-			ret.push({name:e[0].name, pts:e[1]});
+	this.getScores = function () {
+		const ret = []
+		for (let e of score.entries()) ret.push({name: e[0].name, pts: e[1]})
 		return ret
-	};
-	this.reset = function() {
-		rnd = new Random(this.seed || Math.random());
+	}
+	this.softReset = function () {
+		const oldPlayers = []
+		const oldObservers = []
+		while (allPlayers.length) oldPlayers.push(allPlayers.shift())
+		while (observers.length) oldObservers.push(observers.shift())
 
-		score.clear();
-		coins.clear();
-		walls.clear();
+		this.reset()
 
-		currTurn = 0;
+		while (oldPlayers.length) this.addPlayer(oldPlayers.shift())
+		while (oldObservers.length) this.addObserver(oldObservers.shift())
+
+	}
+	this.reset = function () {
+		rnd = new Random(this.seed)
+
+		score.clear()
+		coins.clear()
+		walls.clear()
+
+		currTurn = 0
 
 		/// Clear all
-		while(allAstros.shift());
-		while(observers.shift());
+		while (allPlayers.shift()) while (allAstros.shift()) while (observers.shift())
 
-		/// Regenerate map
-		// Random walls
-		for(let i=-this.size; i<this.size; i++)
-			for(let j=-this.size; j<this.size; j++)
-				if(rnd.next() < this.wallChance)
-					walls.add(idOf(i,j));
+			/// Regenerate map
+			// Random walls
+			for (let i = -this.size; i < this.size; i++) for (let j = -this.size; j < this.size; j++) if (rnd.next() < this.wallChance) walls.add(idOf(i, j))
 
 		// world border
-		for(let i=-this.size+1; i<this.size; i++) {
-			walls.add(idOf(i, -this.size));
-			walls.add(idOf(i, this.size));
-			walls.add(idOf(-this.size, i));
-			walls.add(idOf(this.size, i));
+		for (let i = -this.size + 1; i < this.size; i++) {
+			walls.add(idOf(i, -this.size))
+			walls.add(idOf(i, this.size))
+			walls.add(idOf(-this.size, i))
+			walls.add(idOf(this.size, i))
 		}
 
 		// coins
-		for(let i=this.coinsNumber; i>0; --i)
-			addNewCoin();
-	};
+		for (let i = this.coinsNumber; i > 0; --i) addNewCoin()
+	}
 
 	/**
 	 * @param x, y, flags
@@ -117,62 +119,55 @@ function Board() {
 	 * flags&4 = Coins >> returns constant COIN
 	 * else return false
 	 */
-	this.getCell = function(x,y,flags) {
-		const id = idOf(x,y);
-		if(flags&1 && walls.has(id))
-			return WALL;
+	this.getCell = function (x, y, flags) {
+		const id = idOf(x, y)
+		if (flags & 1 && walls.has(id)) return WALL
 
-		if(flags&2 && this.astroCollide)
-			for(let astro of allAstros)
-				if(astro.x === x && astro.y === y)
-					return ASTRO+astro.rot;
+		if (flags & 2 && this.astroCollide) for (let astro of allAstros) if (astro.x === x && astro.y === y) return ASTRO + astro.rot
 
-		if(flags&4 && coins.has(idOf(x,y)))
-			return COIN;
+		if (flags & 4 && coins.has(idOf(x, y))) return COIN
 
-		return false;
-	};
+		return false
+	}
 
-	this.addPlayer = function(player) {
-		const astro = new Astro(this);
-		player.setAstro(this, astro);
+	this.addPlayer = function (player) {
+		const astro = new Astro(this)
+		player.setAstro(this, astro)
 
-		if(allAstros.length && this.startsAtSameLocation && this.astroCollide) {
-			astro.x = allAstros[0].x;
-			astro.y = allAstros[0].y;
-			astro.rot = allAstros[0].rot;
+		if (allAstros.length && this.startsAtSameLocation && this.astroCollide) {
+			astro.x = allAstros[0].x
+			astro.y = allAstros[0].y
+			astro.rot = allAstros[0].rot
 		} else {
 			do {
-				astro.x = rnd.next(this.size-1, -this.size-1) | 0;
-				astro.y = rnd.next(this.size-1, -this.size-1) | 0;
-			} while (this.getCell(astro.x, astro.y, 0b111));
+				astro.x = rnd.next(this.size - 1, -this.size - 1) | 0
+				astro.y = rnd.next(this.size - 1, -this.size - 1) | 0
+			} while (this.getCell(astro.x, astro.y, 0b111))
 
-			astro.rot = rnd.next(4) | 0;
-			while (astro.fly()); // move till next wall
-		}
+			astro.rot = rnd.next(4) | 0
+			while (astro.fly())  // move till next wall
+				}
 
-		allAstros.push(astro);
-		score.set(astro, 0);
-	};
+		allPlayers.push(player)
+		allAstros.push(astro)
+		score.set(astro, 0)
+	}
 
-	this.addObserver = function(newObserver) {
+	this.addObserver = function (newObserver) {
 		observers.push(newObserver)
-	};
-	this.remObserver = function(newObserver) {
-		let i=observers.indexOf(newObserver);
-		if(i===observers.length)
-			observers.pop();
-		else if(i)
-			observers[i] = observers.pop();
-	};
-	
+	}
+	this.remObserver = function (newObserver) {
+		let i = observers.indexOf(newObserver)
+		if (i === observers.length) observers.pop() else if (i) observers[i] = observers.pop()
+	}
+
 	// // // Private Functions
 	/**
 	 * Ask next player to choose an action
 	 * will call Astro.askForAction function, giving a callback.
 	 *
 	 * This callback have one parameter, integer from -1 to 5
-     *  -1: WAIT (skip action and let others play)
+	 *  -1: WAIT (skip action and let others play)
 	 *   0: MOVE UP / JUMP UP
 	 *   1: MOVE LEFT / JUMP LEFT
 	 *   2: MOVE DOWN / JUMP DOWN
@@ -184,51 +179,50 @@ function Board() {
 	 * callback will return false and wait for another choice.
 	 * If was possible, callback will return true, and then will not accept any more call to it (will return true indefinitelly)
 	 */
-	const turnA = function(whoNext) {
-		if(whoNext.length <=0) {
-			setTimeout(THIS.launch, 0);
+	const turnA = function (whoNext) {
+		if (whoNext.length <= 0) {
+			setTimeout(THIS.launch, 0)
 			return
 		}
 
-		const curr = whoNext.shift();
+		const curr = whoNext.shift()
 
 		// Prepare callback
 		const next = () => {
-			if(THIS.getCell(curr.x, curr.y, 0b100)) {
-				coins.delete(idOf(curr.x, curr.y));
-				score.set(curr, score.get(curr)+1);
+			if (THIS.getCell(curr.x, curr.y, 0b100)) {
+				coins.delete(idOf(curr.x, curr.y))
+				score.set(curr, score.get(curr) + 1)
 				addNewCoin(this)
 			}
-			setTimeout(()=>turnA(whoNext), 0)
-		};
+			setTimeout(() => turnA(whoNext), 0)
+		}
 
 		// Update displays
-		for(let display of observers)
-			display.notifyUpdates();
+		for (let display of observers) display.notifyUpdates()
 
-		if(curr.fly()) { // try to fly (true if done, false if not flying)
+		if (curr.fly()) { // try to fly (true if done, false if not flying)
 			next()
 		} else {
-			curr.askForAction((actionName)=>{
-				const action = mapActionToCode[actionName];
+			curr.askForAction((actionName) => {
+				const action = mapActionToCode[actionName]
 
-				if(!action // command out of bounds
-				   || (action >= 1 && action <= 4 && !curr.move(action-1)) // MOVE command
-				   || (action >= 5 && action <= 6 && !curr.diag(action-5))) // DIAG command
-					return false; // cannot do this move
+				if (!action // command out of bounds
+					|| (action >= 1 && action <= 4 && !curr.move(action - 1)) // MOVE command
+					|| (action >= 5 && action <= 6 && !curr.diag(action - 5))) // DIAG command
+					return false // cannot do this move
 
-				next();
+				next()
 				return true
 			})
 		}
-	};
-	const addNewCoin = function() {
-		let newX;
-		let newY;
+	}
+	const addNewCoin = function () {
+		let newX
+		let newY
 		do {
-			newX = ((rnd.next()*THIS.size*2-1)-THIS.size+1)|0;
-			newY = ((rnd.next()*THIS.size*2-1)-THIS.size+1)|0
-		} while(THIS.getCell(newX,newY,0b111));
+			newX = ((rnd.next() * THIS.size * 2 - 1) - THIS.size + 1) | 0
+			newY = ((rnd.next() * THIS.size * 2 - 1) - THIS.size + 1) | 0
+		} while (THIS.getCell(newX, newY, 0b111))
 		coins.add(idOf(newX, newY))
-	};
+	}
 }
