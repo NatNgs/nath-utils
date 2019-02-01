@@ -13,7 +13,7 @@ function Player() {
 	let board = undefined
 
 	// Public functions
-	this.setAstro = function (b, a) {
+	this.setAstro = function(b, a) {
 		board = b
 		astro = a
 		astro.name = this.name || (this.name = 'Player' + (++pid))
@@ -22,14 +22,15 @@ function Player() {
 			action = cb
 
 			// Update displays
-			for (let o of observers) o.notifyUpdates()
+			for(let o of observers)
+				o.notifyUpdates()
 
 			// call player to play
 			THIS.onAskForAction()
 		}
 	}
 
-	this.getSurroundings = function () {
+	this.getSurroundings = function() {
 		return {
 			//  distance to next [wall, player, playerRotation, coin, beginHidden]
 			u: findNext(0, 1),
@@ -42,13 +43,13 @@ function Player() {
 			dr: findNext(1, -1),
 		}
 	}
-	this.getRotation = function () {
+	this.getRotation = function() {
 		return astro.rot
 	}
 
 	// return true if successful, false if should try again
-	this.doAction = function (actionCode) {
-		if (action(actionCode)) {
+	this.doAction = function(actionCode) {
+		if(action(actionCode)) {
 			action = (x) => true // avoid multiple call
 			return true
 		}
@@ -60,18 +61,21 @@ function Player() {
 	 */
 	this.onAskForAction = () => {
 		const moves = ['wait', 'mv_u', 'mv_d', 'mv_l', 'mv_r', 'rt_l', 'rt_r']
-		while (!this.doAction(moves[(Math.random() * moves.length) | 0]))
-			}
+		while(!this.doAction(moves[(Math.random() * moves.length) | 0])) ;
+	}
 
-	this.addObserver = function (newObserver) {
+	this.addObserver = function(newObserver) {
 		observers.push(newObserver)
 	}
-	this.remObserver = function (newObserver) {
+	this.remObserver = function(newObserver) {
 		let i = observers.indexOf(newObserver)
-		if (i === observers.length) observers.pop() else if (i) observers[i] = observers.pop()
+		if(i === observers.length)
+			observers.pop()
+		else if(i)
+			observers[i] = observers.pop()
 	}
 
-	const findNext = function (mvx, mvy) {
+	const findNext = function(mvx, mvy) {
 		let x = astro.x
 		let y = astro.y
 		let wall = 0
@@ -84,26 +88,26 @@ function Player() {
 		// can see walls and players behind coins
 		// can see coin behind players
 		// cant see coins behind walls > 0
-		while (count < MAX_DIST) {
+		while(count < MAX_DIST) {
 			x += mvx
 			y += mvy
 			count++
 
-			if (mvx && mvy) {// only for diagonals
-				if (board.getCell(x - mvx, y, 0b001) && board.getCell(x, y - mvy, 0b001)) {
+			if(mvx && mvy) {// only for diagonals
+				if(board.getCell(x - mvx, y, 0b001) && board.getCell(x, y - mvy, 0b001)) {
 					hidden = count
 					break
 				}
 			}
 
-			if (!coin && board.getCell(x, y, 0b100)) {
+			if(!coin && board.getCell(x, y, 0b100)) {
 				coin = count
-			} else if (!player) {
+			} else if(!player) {
 				const astro = board.getCell(x, y, 0b010)
-				if (astro) {
+				if(astro) {
 					player = count
 					prot = astro
-				} else if (board.getCell(x, y, 0b001)) {
+				} else if(board.getCell(x, y, 0b001)) {
 					wall = count
 					hidden = count + 1
 					break

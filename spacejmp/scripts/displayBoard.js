@@ -11,13 +11,13 @@ function BoardDisplay(grid) {
 
 	grid.addObserver(this)
 
-	this.notifyUpdates = function () {
+	this.notifyUpdates = function() {
 		console.log('Notified Board')
 		// Grid
-		for (let i = -THIS.halfWidth; i <= THIS.halfWidth; i++) {
-			for (let j = -THIS.halfHeight; j <= THIS.halfHeight; j++) {
+		for(let i = -THIS.halfWidth; i <= THIS.halfWidth; i++) {
+			for(let j = -THIS.halfHeight; j <= THIS.halfHeight; j++) {
 				const cell = document.getElementById(idOf(i, j))
-				if (!cell) continue
+				if(!cell) continue
 
 				const classes = cell.classList
 				classes.remove(WALL)
@@ -28,20 +28,21 @@ function BoardDisplay(grid) {
 				classes.remove(ASTRO + 3)
 
 				const somethingOnCell = grid.getCell(display.x + i, display.y + j, 0b111)
-				if (somethingOnCell) classes.add(somethingOnCell)
+				if(somethingOnCell) classes.add(somethingOnCell)
 			}
 		}
 
 		// Score
 		let html = '<tr><th>Astro</th><th>Score</th>'
-		for (let i of grid.getScores().sort((a, b) => b.pts - a.pts)) html += '<tr><td>' + i.astro.name + ':</td><td>' + i.pts + '</td></tr>'
+		for(let i of grid.getScores()
+		                 .sort((a, b) => b.pts - a.pts)) html += '<tr><td>' + i.astro.name + ':</td><td>' + i.pts + '</td></tr>'
 
 		document.getElementById('scores').innerHTML = html
 	}
 
-	this.bindToKeyboard = function () {
-		document.onkeydown = function (e = window.event) {
-			switch (e.keyCode) {
+	this.bindToKeyboard = function() {
+		document.onkeydown = function(e = window.event) {
+			switch(e.keyCode) {
 				case 37:
 					x--
 					break // left
@@ -61,11 +62,11 @@ function BoardDisplay(grid) {
 		}
 	}
 
-	this.getHtml = function () {
+	this.getHtml = function() {
 		let html = ''
-		for (let x = -this.halfWidth; x <= this.halfWidth; x++) {
+		for(let x = -this.halfWidth; x <= this.halfWidth; x++) {
 			html += '<tr>'
-			for (let y = this.halfHeight; y >= -this.halfHeight; --y) html += '<td id="' + idOf(x, y) + '" class="cell"></td>'
+			for(let y = this.halfHeight; y >= -this.halfHeight; --y) html += '<td id="' + idOf(x, y) + '" class="cell"></td>'
 			html += '</tr>'
 		}
 		return html

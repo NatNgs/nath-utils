@@ -1,4 +1,3 @@
-const pNumbers = 32
 const playersByName = []
 
 // 1- new Board()
@@ -24,7 +23,7 @@ function relaunch() {
 }
 
 function onValidateSettings(params) {
-	if (!params || !params.players || params.players.length < 1) {
+	if(!params || !params.players || params.players.length < 1) {
 		console.error('Init without parameters or without players => FAILURE')
 		return
 	}
@@ -37,7 +36,8 @@ function onValidateSettings(params) {
 	 * 	board.onEnd (callback function)
 	 * 	board.coinsNumber (int positive or 0)
 	*/
-	for (let param in defaultParams) board[param] = params[param] || defaultParams[param]
+	for(let param in defaultParams)
+		board[param] = params[param] || defaultParams[param]
 
 	// 3- call board.reset() to initiate the board
 	board.reset()
@@ -46,7 +46,7 @@ function onValidateSettings(params) {
 	 * 	board.addPlayer(astro)
 	 * 	board.addObserver(observer)
 	*/
-	for (let p of params.players) {
+	for(let p of params.players) {
 		board.addPlayer(p)
 		playersByName[p.name] = p
 	}
@@ -63,7 +63,9 @@ function getByName(name) {
 
 function download(filename, data) {
 	const file = new Blob([data])
-	if (window.navigator.msSaveOrOpenBlob) window.navigator.msSaveOrOpenBlob(file, filename) else {
+	if(window.navigator.msSaveOrOpenBlob)
+		window.navigator.msSaveOrOpenBlob(file, filename)
+	else {
 		const a = document.createElement('a')
 		const url = URL.createObjectURL(file)
 		a.href = url

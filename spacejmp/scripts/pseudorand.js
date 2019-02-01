@@ -5,7 +5,7 @@ function Random(seed) {
 	let m_w = (123456789 + seed) & mask
 	let m_z = (987654321 - seed) & mask
 
-	this.next = function (max = 1, min = 0) {
+	this.next = function(max = 1, min = 0) {
 		m_z = (36969 * (m_z & 65535) + (m_z >> 16)) & mask
 		m_w = (18000 * (m_w & 65535) + (m_w >> 16)) & mask
 		let result = ((m_z << 16) + (m_w & 65535)) >>> 0

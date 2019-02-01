@@ -27,7 +27,7 @@ function init() {
 	document.getElementById('board').innerHTML = display.getHtml()
 
 	// Generate random bot players
-	for (let i = 5; i >= 0; --i) board.addPlayer(new Player())
+	for(let i = 5; i >= 0; --i) board.addPlayer(new Player())
 
 	// 5- call board.launch() !
 	board.launch()
@@ -52,14 +52,15 @@ function generateManPlayer() {
 	let call = false
 
 	document.onkeydown = (e = window.event) => {
-		if (e.keyCode === 16) {
+		if(e.keyCode === 16) {
 			shift = true
-		} else if (call && p.doAction(keyMap[e.keyCode + (shift ? 's' : '')])) {
+		}
+		else if(call && p.doAction(keyMap[e.keyCode + (shift ? 's' : '')])) {
 			call = false
 		}
 	}
 	document.onkeyup = (e = window.event) => {
-		if (e.keyCode === 16) shift = false
+		if(e.keyCode === 16) shift = false
 	}
 
 	p.onAskForAction = () => {

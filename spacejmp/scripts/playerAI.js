@@ -54,21 +54,21 @@ function Genetic(inheritance) {
 
 	 memory = -1 to 1 array (size = memSize)
 	*/
-	this.buildOutput = function (input, memory) {
+	this.buildOutput = function(input, memory) {
 		// Building input
 		const inpt = []
-		for (let a of ['wait', 'mv_u', 'mv_l', 'mv_d', 'mv_r', 'rt_l', 'rt_r']) inpt.push(input.last === a ? 1 : -1)
+		for(let a of ['wait', 'mv_u', 'mv_l', 'mv_d', 'mv_r', 'rt_l', 'rt_r']) inpt.push(input.last === a ? 1 : -1)
 
-		for (let r = 0; r <= 3; r++) inpt.push(input.rot === r ? 1 : -1)
+		for(let r = 0; r <= 3; r++) inpt.push(input.rot === r ? 1 : -1)
 
-		for (let o of ['u', 'l', 'd', 'r', 'ul', 'ur', 'dl', 'dr']) {
+		for(let o of ['u', 'l', 'd', 'r', 'ul', 'ur', 'dl', 'dr']) {
 			inpt.push(!input.next[o][0] ? -1 : 2 / input.next[o][0] - 1)
 			inpt.push(!input.next[o][1] ? -1 : 2 / input.next[o][1] - 1)
 			inpt.push(!input.next[o][3] ? -1 : 2 / input.next[o][3] - 1)
 			inpt.push(!input.next[o][4] ? -1 : 2 / input.next[o][4] - 1)
 		}
 
-		for (let i = 0; i < memory.length; i++) inpt.push(memory[i])
+		for(let i = 0; i < memory.length; i++) inpt.push(memory[i])
 
 		// compute througth network
 		const otpt = this.arrOutput(inpt)
@@ -85,18 +85,18 @@ function Genetic(inheritance) {
 		}
 	}
 
-	this.arrOutput = function (input) {
+	this.arrOutput = function(input) {
 		let otpt = input
-		for (let sl = 0; sl < this.genes.length; sl++) {
+		for(let sl = 0; sl < this.genes.length; sl++) {
 			//console.log(otpt)
 			let inpt = [1, ...otpt]
 			otpt = []
-			for (let sg = 0; sg < this.genes[sl].length; sg++) {
+			for(let sg = 0; sg < this.genes[sl].length; sg++) {
 				otpt[sg] = 0
 
 				//console.log(inpt.length, this.genes[sl][sg].length)
 
-				for (let s = 0; s < this.genes[sl][sg].length; s++) otpt[sg] += inpt[s] * this.genes[sl][sg][s]
+				for(let s = 0; s < this.genes[sl][sg].length; s++) otpt[sg] += inpt[s] * this.genes[sl][sg][s]
 
 				// FONCTION D'ACTIVATION
 				// otpt[sg] = sigmoid(otpt[sg])
@@ -107,7 +107,7 @@ function Genetic(inheritance) {
 		return otpt
 	}
 
-	this.export = function () {
+	this.export = function() {
 		let str = JSON.stringify(this.genes)
 		str = str.replace(/[1-9]+\.[0-9]+/g, '0.99999')
 		str = str.replace(/0\.([0-9]{0,5})[0-9]*/g, '$1')
@@ -116,7 +116,7 @@ function Genetic(inheritance) {
 		str = str.replace(/],\[/g, '][')
 		return str
 	}
-	this.import = function (string) {
+	this.import = function(string) {
 		let str = string.replace(/]\[/g, '],[')
 		str = str.replace(/([^[])-/g, '$1,-')
 		str = str.replace(/([0-9]+)/g, '0.$1')
@@ -125,42 +125,43 @@ function Genetic(inheritance) {
 
 	// // // INIT // // //
 
-	if (inheritance && inheritance.length > 0) {
+	if(inheritance && inheritance.length > 0) {
 		// Average of all inherited + random value
 		const nb = inheritance.length
 
 		// sl: synapse layer
-		for (let sl = 0; sl < inheritance[0].length; sl++) {
+		for(let sl = 0; sl < inheritance[0].length; sl++) {
 			this.genes[sl] = []
 			// sg: synapse group
-			for (let sg = 0; sg < inheritance[0][sl].length; sg++) {
+			for(let sg = 0; sg < inheritance[0][sl].length; sg++) {
 				this.genes[sl][sg] = []
 				// s: synapse
-				for (let s = 0; s < inheritance[0][sl][sg].length; s++) {
+				for(let s = 0; s < inheritance[0][sl][sg].length; s++) {
 					let total = 0
 					let chance = Math.random() * 2 - 1 // -1 to 1
 
-					for (let i = 0; i < inheritance.length; i++) total += inheritance[i][sl][sg][s]
+					for(let i = 0; i < inheritance.length; i++) total += inheritance[i][sl][sg][s]
 
 					this.genes[sl][sg][s] = (total / nb) * (1 - evolRatio) + chance * evolRatio
 				}
 			}
 		}
-	} else {
+	}
+	else {
 		// random generation
 		this.genes.push([inputs, hiddenLayers[0]])
-		for (let l = 1; l < hiddenLayers.length; l++) this.genes.push([hiddenLayers[l - 1], hiddenLayers[l]])
+		for(let l = 1; l < hiddenLayers.length; l++) this.genes.push([hiddenLayers[l - 1], hiddenLayers[l]])
 		this.genes.push([hiddenLayers[hiddenLayers.length - 1], outputs])
 
 		// sl: synapse layer
-		for (let sl = 0; sl < this.genes.length; sl++) {
+		for(let sl = 0; sl < this.genes.length; sl++) {
 			const size0 = this.genes[sl][0] + 1 // +1 for Bayes
 			const size1 = this.genes[sl][1]
 			// sg: synapse group
-			for (let sg = 0; sg < size1; sg++) {
+			for(let sg = 0; sg < size1; sg++) {
 				this.genes[sl][sg] = []
 				// s: synapse
-				for (let s = 0; s < size0; s++) this.genes[sl][sg][s] = Math.random() * 2 - 1
+				for(let s = 0; s < size0; s++) this.genes[sl][sg][s] = Math.random() * 2 - 1
 			}
 		}
 	}
@@ -178,7 +179,7 @@ function generateAIPlayer(grid) {
 	p.gen = new Genetic() // in player so that it can be modified dynamically without need to rebuild onAskForAction
 	p.wrongMoves = 0
 	let memory = []
-	for (let i = 0; i < memSize; i++) memory.push(0)
+	for(let i = 0; i < memSize; i++) memory.push(0)
 	let lastAction = 'wait'
 
 	p.onAskForAction = () => {
@@ -192,7 +193,7 @@ function generateAIPlayer(grid) {
 		const acts = ['wait', 'mv_u', 'mv_l', 'mv_d', 'mv_r', 'rt_l', 'rt_r']
 		acts.sort((a, b) => out[b] - out[a])
 		let act
-		while (!p.doAction(act = acts.shift())) p.wrongMoves++
+		while(!p.doAction(act = acts.shift())) p.wrongMoves++
 		lastAction = act
 	}
 	return p
