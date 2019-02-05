@@ -1,0 +1,55 @@
+Syllables form: C(C)V(V)
+One or two consonants (Never none or more than 2), followed by one or two vowels (never none or more than two).
+
+
+Vowels (from most to least common):
+written | IPA  | like in word (between brackets)
+--------+------+--------------------------------------------------------
+A       | aɑɒæ | p[â]ttes, t[a], m[a]man, p[a]pa
+E       | eɛ   | f[ê]te, f[ait], f[ée]
+Ù (Ou*) | uw   | s[ous], p[ou]le, p[ou]r, [ou]i, po[w]er
+I       | ij   | n[id], r[î]mes, l[i]gne, [hi]er, a[il], b[ille], [y]eux
+O       | oɔ   | s[eau], s[o]rt
+U       | y    | m[û]le, d[u]
+È (Eu*) | əøœ  | m[eu]le, c[e], s[oeu]r
+Ò (On*) | ɔ̃    | s[on]
+À (An*) | ɑ̃    | s[ans], p[en]dule
+Ì (In*) | œ̃ɛ̃   | [un], br[in]
+
+(* in case accents are not supported)
+
+Double vowels can be combinations of any two different vowels.
+
+######################################################
+
+Consonants (from most to least common):
+written | IPA | like in word (between brackets)      | More Infos
+--------+-----+--------------------------------------+-------------------
+S       | s   | [s]alad, fa[c]e                      | 
+Z (S')  | z   | [z]oo, ba[s]e                        | 
+K       | k   | [k]ing, [q]ueen                      | 
+G (K')  | g   | [g]oal, [g]ate                       | 
+T       | t   | [t]alk, [t]elephone                  | 
+D (T')  | d   | [d]eal, ma[d]                        | 
+M       | m   | [m]an, [m]a[m]a                      | 
+N (M')  | n   | ma[n], [n]etwork                     | 
+P       | p   | [p]ool, to[p]                        | 
+B (P')  | b   | [b]oat, ca[b]le                      | 
+X       | ʔ   | un[ h]érisson (French)               | glottal stop, or significate no link between 2 vowels
+H (X')  | h   | [h]igh, [h]ow, [h]at                 | aspirated
+C       | ʃ   | [sh]eep, ac[ti]on                    | 
+J (C')  | ʒ   | vi[si]on, fu[si]on                   | 
+F       | f   | [f]riction, a[f]ter                  | 
+V (F')  | v   | [v]owel, [v]iew                      | 
+R       | ʀX  | [r]at (French), [j]ota (Spanish)     | trilled R
+L (R')  | rl  | mea[l], [l]ibrary, pe[rr]o (Spanish) | rolled R
+
+Consonants without accents are "strong" ones: S, K, T, M*, P, X*, C, F and R*.
+Consonants with accents are "weak" ones     : Z, G, D, N*, B, H*, J, V and L*.
+(* Irregular consonants, that could not be part of double consonant combination)
+
+Double consonants can be:
+ - combination of any two different regular strong consonants.
+ - combination of any two different regular weak consonants.
+
+Double consonants combinations Weak+Strong or Strong+Weak does not exists.

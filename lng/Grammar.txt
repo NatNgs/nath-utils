@@ -25,16 +25,15 @@ Particle are for example:
 of, according to, during, from, to, while, ...
 
 
-(Cat; food + active; while + (Mouse; food + passive) + while + end)
+(Cat; food + active; while; Mouse; food + passive; while + endGroup)
 Cat is eating while Mouse is being eaten.
 
-Can be used without argument to implicit that last sentence is the argument.
-(Mouse; food + passive). (Cat; food + active; while).
+(Mouse; food + passive). (Cat; food + active; while; <implicit>).
 Mouse is being eaten. Cat is eating while (that was said in last sentence).
 
 Example with more than 1 argument:
 There is a dog, a big cat and a mouse.
-(And; (dog, <group-begin> + (Cat; big) + <group-begin> + <group-end>, mouse) + And + <group-end>).
+(And; (dog, <group> + (Cat; big) + <group> + endGroup, mouse) + And + endGroup).
 
 
 Sentences:
@@ -108,5 +107,5 @@ Past+Past+Past > Past+Past > Past+Past+Future ># Past #
 How to count things:
 ---------------------
 
-There is 42 cats.	(Cat; 42; Be + Passive)
+There are 42 cats.	(Cat; 42; Be + Passive)
 This is the 42th cat.	(Cat; <nth> + 42; Be + Passive)
