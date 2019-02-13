@@ -1,0 +1,142 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<style>
+	body {
+		background-color: #44A;
+	}
+
+	.land {
+	  fill: #250;
+	  stroke: #232;
+	  stroke-width: 1px;
+	}
+
+	.outline {
+	  fill: none;
+	}
+
+	.circle {
+	  fill: none;
+	}
+
+	.major {
+	  stroke-dasharray:none;
+	  stroke-width: 1px;
+	}
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+
+	<script src="./d3.min.js"></script>
+	<script src="./topojson.min.js"></script>
+	<script src="./world.js"></script>
+	<script>
+	const degrees = 180 / Math.PI;
+	const δ = 1000 / 6371 * degrees;
+	const path = d3.geo.path().pointRadius(2);
+	const land = topojson.feature(world, world.objects.land);
+	const equidistant = d3.geo
+				.azimuthalEquidistant()
+				.translate([500, 500])
+				.scale(140)
+				.clipAngle(175)
+				.precision(.1)
+
+	let currLat = 0; /* -90 > 90 N/S */
+	let currLng = 0; /*-180 > 180 E/O */
+
+	
+	function xyzToLatlng(xyz) {
+		const x = xyz[0];
+		const y = xyz[1];
+		const z = xyz[2];
+		return [
+			90 - (Math.acos(y / Math.sqrt(x*x+y*y+z*z))) * degrees,
+			((270 + (Math.atan2(x , z)) * degrees) % 360) -180
+		];
+	}
+	function latlngToXyz(lat, lng) {
+		return [
+			-Math.cos(lat/degrees) * Math.cos(lng/degrees),
+			Math.sin(lat/degrees),
+			Math.cos(lat/degrees) * Math.sin(lng/degrees),
+		];
+	}
+	
+	function goToPath(data) {
+		const p=()=>{
+			const d = data.shift();
+			if(d)
+				goTo(d[0],d[1],d[2], p)
+		}
+		p();
+	}
+	function goTo(dirLat,dirLng,stN,cb) {
+		if((stN|=0)<=0)
+			return;
+		
+		goTo2(latlngToXyz(currLat, currLng),
+		latlngToXyz(dirLat,dirLng),1,stN,cb);
+	}
+	function goTo2(beg,dir,st,stN,cb) {
+		if(st<=0||st>=stN) {
+			moveTo(xyzToLatlng(dir));
+			return cb&&cb()||true;
+		}
+		
+		const nd = stN-st;
+		let next = xyzToLatlng([
+			(beg[0]*nd+dir[0]*st)/stN,
+			(beg[1]*nd+dir[1]*st)/stN,
+			(beg[2]*nd+dir[2]*st)/stN,
+		]);
+		
+		setTimeout(()=>{
+			moveTo(next);
+			goTo2(beg,dir,st+1,stN,cb);
+		}, 20);
+	}
+
+	function init() {
+		const svg = d3.selectAll('#map').data([equidistant]).append('svg');
+		svg.each(project);
+		
+		let g = svg.append('g');
+		g.append('path').datum(land).attr('class', 'land');
+		g.append('path').attr('id', 'actu');
+	}
+	function moveTo(latlng) {
+		equidistant.rotate([-latlng[1], -latlng[0], 0]);
+		d3.select('#actu').datum({type: 'Point', coordinates: [latlng[1], latlng[0]]});
+		d3.select('g').each(redraw);
+		currLat = latlng[0];
+		currLng = latlng[1];
+	}
+
+	function redraw(p) {
+	  d3.select(this).selectAll('path').attr('d', path.projection(p));
+	}
+	function project(p) {
+	  const t = p.translate();
+	  d3.select(this).attr('width', 2 * t[0]).attr('height', 2 * t[1]);
+	}
+	
+	init();
+	moveTo([43.5,7]);
+	goToPath([
+	//   lat    lng     steps
+		[43.5,	7,		1], // Vallauris
+		[43.75,	7.25,	10], // Nice
+		[48.9,	2.4,	30], // Paris
+		[35.6,	139.6,	200], // Tokyo
+		[33.4,	130.3,	30], // Fukuoka
+		[35.6,	139.6,	200], // Tokyo
+		[48.9,	2.4,	200], // Paris
+		[43.75,	7.25,	30], // Nice
+		[43.5,	7,		10], // Vallauris
+	]);
+	</script>
+</body>
+</html>
