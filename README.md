@@ -14,10 +14,10 @@ Projects can be: tools, demo, tests/POC, ...
 
 ## Branching strategy
 
-- No branch should be fork of `master` branch.
-- New sub-project branch should be fork of `projectscommon` branch.
+- No branch should be forked from `master` branch.
+- New sub-project branch should be forked from `projectscommon` branch.
   - Should be named with full lowercase and digits, like `newutiltool`.
-- New sub-project feature or temporary branch should be fork of the corresponding sub-project branch.
+- New sub-project feature or temporary branch should be forked from the corresponding sub-project branch.
   - Should be named starting with sub-project name, then a slash, then any description in lowercase: `newutiltool/feature42`
 
 
