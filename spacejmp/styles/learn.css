@@ -1,0 +1,62 @@
+.cell {
+	font-size: 10px;
+	border: 1px dotted black;
+	width: 30px;
+	height: 30px;
+	overflow: hidden;
+}
+.c_off {
+	border: none;
+}
+
+.wall {
+	border: 1px dotted white;
+	background-color: #000
+}
+
+.astro0 {
+	background-size: cover;
+	background-image: url("astro0.png");
+	overflow: hidden;
+}
+.astro1 {
+	background-size: cover;
+	background-image: url("astro1.png");
+	overflow: hidden;
+}
+.astro2 {
+	background-size: cover;
+	background-image: url("astro2.png");
+	overflow: hidden;
+}
+.astro3 {
+	background-size: cover;
+	background-image: url("astro3.png");
+	overflow: hidden;
+}
+
+.coin {
+	background-image: url("coin.svg");
+	background-size: 50%;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+#grid, #scores, .commands {
+	border: 1px solid black;
+	border-collapse:collapse;
+}
+
+.kbd {
+	display: inline-block;
+	background-color: #FAFAFA;
+	height: 15px;
+	min-width: 15px;
+	text-align: center;
+	margin: 2px;
+	padding: 2px;
+	border-radius: 2px;
+	border: 1px solid #CCCCCC;
+	border-right: 1px solid #333333;
+	border-bottom: 1px solid #333333;
+}
