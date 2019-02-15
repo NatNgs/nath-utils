@@ -207,7 +207,7 @@ function Battle(rules, templates) {
 		if(ctsNames.length%2 > 0) {
 			cts = `${cts}
 <tr class="cts">
-	<td><span>${ctsNames[ctsNames.length]}: ${card.cts[card.cts.length]|0}</span> <span id="${id}-stt-cts${ctsNames.length-1}" class="stat"></span></td>
+	<td><span>${ctsNames[ctsNames.length-1]}: ${card.cts[card.cts.length-1]|0}</span> <span id="${id}-stt-cts${ctsNames.length-1}" class="stat"></span></td>
 	<td>-</td>
 </tr>`;
 		}

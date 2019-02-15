@@ -1,0 +1,95 @@
+
+
+	Blob
+		[V]isual caracts
+			Width  (0=10cm, 100%=1m)
+			Length (0=10cm, 100%=1m)  
+			Height (0=10cm, 100%=1m)
+			ColorR (0=0, 	100%=255)
+			ColorG (0=0, 	100%=255)
+			ColorB (0=0, 	100%=255)
+			ColorA (0=30%, 	100%=70%)
+			Shine  (0=no light reflexion, 100%=like mirror)
+			Roughness (0=like ice,	  100%=like clay)
+		[B]attle caracts
+			Attack
+			Defense (Foe'sAtt-Blob'sDef = Blob'sLife loose)
+			Life
+			Passive effect
+			Active effect (Before each turn, can be activate or not; equipements active effects are activated at the same time)
+		Equipments
+			Element
+			body parts (eyes, arms...)
+			Item inside
+	
+	{Passive|Active} Effect
+		Teammates(and actor)'s one caract (V or B) edit (caract will have %bonus/malus)
+		Foes's one caract (V or B) edit
+		All's one caract (V or B) edit
+		
+	Element
+		Application function (to calculate a % of efficiency depending on blob V caracts)
+		Passive Effect
+		Active Effect
+
+	Body part
+		Caracts (each body part type has his own caracts types; for ex. colorR,G,B for eyes, size for arms...)
+		Actor's B caracts edit (potentially none or one for each B caracts)
+		Passive Effect
+		Active Effect
+		
+	Item
+		Passive Effect
+		Active Effect
+		
+		
+		
+
+init:
+	Each player has 15~30 blobs (same number for each player)
+	Each player order his waiting blobs
+	
+turn:	
+	Each player take the firsts waiting blobs to have 5 in his hand
+	Each player choose blobs from his hand to join battlefield, in order to have 3 blobs in the battle
+	All choosen blobs of all players appear on the battlefield at the same time
+	
+	Players choose at the same time for all their blobs to activate or not it active effect
+	Effects are shown
+	
+	All players at the same time choose their blobs actions (without been shown to other player)
+	Actions:
+		- Select 1 or more blobs to attack. Select 1 or more foes blobs to taget.
+			Att force = Sum of attacking blobs 'Attack' divided by targetted blobs number
+			For each targetted blobs:
+				[Damages without def bonus] = [Att force] - [blob defense]
+				[Damages] = [Damages without def bonus] - [blob defense bonus]
+				Blob's life -= Damages (if not negative)
+				
+				(computing [%defensive bonus] = [blob defense bonus]
+		
+		- Select 1 or more blobs to defend. Select 1 or more ally blobs to target. (targets can be defenders too)
+			Def force = {Sum of defending blobs 'Defense'] ÷ ([targetted blobs number] + [defending blobs numbers]) 
+																	[a defending and targetted blob will count 2 times]
+			For each targetted blobs:
+				Blob defense bonus += Def force
+			For defending blobs:
+				Blob defense bonus += Def force
+		
+	All action simultaneously solved (not depending on order or who is killed or not)
+	
+	After actions solved:
+	all Blob defense bonus set to 0
+	
+	Each blobs has Live <=0 is removed from the battlefield
+	Each blobs remaining on battlefield and players earn xp
+		(att) xp += {Sum for each attacked foe of [reduced live]÷[total live]} ÷ [Number of attacking blobs]
+		(def) xp += {Sum for each defended ally of [reduced live]÷[total live]}
+
+	If a player's who loose blobls has his waiting blob's queue empty, end game. 
+	Else nextTurn;
+
+end:
+	Player who have more blobs left (sum battlefields, hands and waitings blobs) win
+	
+	
