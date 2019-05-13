@@ -1,0 +1,117 @@
+<WORD>:
+	<definition>
+	(n: <english translation of this word as a noun>, <english definition>)
+	(a: <english translation of this word as an active verb>, <english definition>)
+	(p: <english translation of this word as a passive verb>, <english definition>)
+
+-Pa:
+	(Passive)
+
+-Ka:
+	(Active)
+
+-Nò:
+	(Negative)
+
+-Zè:
+	(Interrogative)
+
+-Mi:
+	(Imperative)
+
+-Ki:
+	(Conditional)
+
+-Sù:
+	(Past)
+
+-Fù:
+	(Future)
+
+-Zù:
+	(ProgressivePast)
+
+-Vù:
+	(ProgressiveFuture)
+
+-Ne:
+	(group-end)
+
+Ma:
+	(subordinate, to be used as a group, eg.: "Ma <1> MaNe". Util to use any kind of sentence, as one gramatical group unit)
+
+To:
+	(~and, to be used as a group: "To <1> <2> <3> ToNe" = "<1> and <2> and <3>")
+
+Ta:
+	(~or, to be used as a group: "Ta <1> <2> <3> TaNe" = "<1> or <2> or <3>")
+
+Vo:
+	Sila (Ta Sa Xato TaNe) Gùrù TotoPa Zimi SaPa
+	(word, group of one or multiple syllables that have a distinct meaning)
+
+Sila:
+	<Sound> <Voice>Pa TotoNò MonoPa (To <Consonant> <Vowel> ToNe)
+	(n: syllable, distinct vacalized sound, composed by a consonant and a vowel)
+	(n: ~letter, symbol that represent a syllable)
+	(a: to pronounce)
+
+Gùrù:
+	RiPaKi Mono Xato.
+	(n: group, set, union of multiple elements, or that could contains multiple elements (even if there is none or only one))
+	(a: to group, make multiple things into a group)
+
+Ri:
+	(n: possession)
+	(a: to have; <a> RiKa <b>: <a> have <b>)
+	(p: to be a part of; <a> RiPa <b>: <a> is a part of <b>)
+
+Toto:
+	(n: equality)
+	(a: to become identical, making similar)
+	(p: to be the same, to be equal)
+
+Xato:
+	(n: multiple, big, large)
+	(a: increase, improve)
+	(p: to be larger than, to be greater than, to be better than)
+
+Xito:
+	(under, lower, worst than)
+
+Zimi:
+	(n: meaning, value)
+	(a: to define, create a meaning)
+	(p: to mean, to represent)
+
+Mono:
+	(n: thing, element, composition, concept of)
+	(a: to create, to make (a thing))
+	(p: to be, to exist, to be considered)
+
+Tcu:
+	(n: 0, None)
+	(a: to remove, to nullify)
+	(p: to be nothing, to be insignifiant)
+
+Sa:
+	(n: 1, single)
+	(a: to Merge, to unify)
+	(p: to be unique)
+
+Ke:
+	(n: 2)
+	(a: to double)
+	(p: to be in pair)
+
+Tù:
+	(n: 3)
+
+Mi:
+	(n: 4)
+
+Po:
+	(n: 5)
+
+Xe:
+	(n: ~zeroes after a, mark the number of zeros (or number of unsignificant digits) of the following number)

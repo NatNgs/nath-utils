@@ -18,7 +18,8 @@ U       | y    | m[û]le, d[u]
 
 (* in case accents are not supported)
 
-Double vowels can be combinations of any two different vowels.
+Double vowels can be combinations of any two different vowels. 
+Double vowels are less frequent than single vowels
 
 ######################################################
 
@@ -35,7 +36,7 @@ M       | m   | [m]an, [m]a[m]a                      |
 N (M')  | n   | ma[n], [n]etwork                     | 
 P       | p   | [p]ool, to[p]                        | 
 B (P')  | b   | [b]oat, ca[b]le                      | 
-X       | ʔ   | un[ h]érisson (French)               | glottal stop, or significate no link between 2 vowels
+X       | ʔ   |                                      | glottal stop, or significant distinction of 2 following vowels
 H (X')  | h   | [h]igh, [h]ow, [h]at                 | aspirated
 C       | ʃ   | [sh]eep, ac[ti]on                    | 
 J (C')  | ʒ   | vi[si]on, fu[si]on                   | 
@@ -51,5 +52,7 @@ Consonants with accents are "weak" ones     : Z, G, D, N*, B, H*, J, V and L*.
 Double consonants can be:
  - combination of any two different regular strong consonants.
  - combination of any two different regular weak consonants.
+
+Double consonants are less frequent than single consonants.
 
 Double consonants combinations Weak+Strong or Strong+Weak does not exists.

@@ -2,6 +2,15 @@
 ###   Structure test 1   ###
 ############################
 
+Notation:
+-------------------
+
+All words starts with uppercase letter, and after are composed by lowercase letters.
+All particles starts with uppercase letter, and after are composed by lowercase letters.
+All groups starts with an open parenthesis before the group-begin, and finishes with a closen parenthesis after group-end.
+A dot separate sentenses.
+
+
 Sentence:
 -------------------
 
@@ -36,13 +45,16 @@ There is a dog, a big cat and a mouse.
 (And; (dog, <group> + (Cat; big) + <group> + endGroup, mouse) + And + endGroup).
 
 
-Sentences:
--------------------
+When having groups of groups, doubleing the group can be used to avoid confusion with enclosing group:
+Engl: a and b and (c or d or (e and f) or g or h) and i and j.
+Meta: (And, a, b, (Or, c,  d, (And², e,  f, And² + <endgroup>), g, h, Or + endGroup), i, j, And + endGroup).
+Actu: (To <a> <b> (Ta <c> <d> (ToTo <e> <f> TotoNe) <g> <h> TaNe) <i> <j> ToNe).
 
-(Description; 1; Short; of (Property; All)      ; change + passive + imperative + future; during (Installation; Process; The)        ; list + passive; below)
-A Short Description of (All properties) witch must be changed during (the installation process) is listed below.
-^                                             ^^^^^^^^^^^^^^^         ^^^                       ^^^^^^^^^
-1                                      imperative passive future     unique                     passive
+Repeating the group-start particle between elements is also possible to easier remembering of the struture.
+Engl: a and b and (c or d) and e and f.
+Meta: (And, a, b, (Or, c,  d, Or + endGroup), And, e, f, And + endGroup).
+Actu: (To <a> <b> (Ta <c> <d> TaNe) To <e> <f> ToNe).
+
 
 
 Verbs:
@@ -52,49 +64,52 @@ Verbs:
 Example with Subject: Cat, Action: Eat
 
 2- Relativity
-Nominative: 'Food'		> No particle
-Active: 'to Eat'		> -Ka
-Passive: 'to be Eaten'	> -Pa
+Nominative: 'Food'     > No particle (often translate nouns)
+Active: 'to Eat'       > -Ka         (often translate verbs)
+Passive: 'to be Eaten' > -Pa         (often translate adjectives)
+Active and passive: 'to and to be eaten' > -KaPa
 
 3- Mode
-Affirmative: Cat eat		> No particle
-Negative: Cat do not eat	> -Nò
-Imperative: Cat should eat	> -Mi
-Conditional: Cat may eat	> -Ki
+Affirmative: Cat eat               > No particle
+Negative: Cat do not eat           > -Nò
+Imperative: Cat should eat         > -Mi
+Conditional: Cat may eat           > -Ki  (unknown or good chance (50% > 80%) for affirmative equivalent)
+Interrogative: Is the cat eating ? > -Zè
 
---Can be combinated:
- Negative + Imperative:		Cat (should not) eat	> -Nòmi
- Negative + Conditional:	Cat (may not) eat		> -Nòki
- Imperative + Negative:		Cat should (not eat)	> -Minò
- Conditional + Negative:		Cat may (not eat)	> -Kinò
- Conditional + Imperative:	Cat may have to eat		> -Kimi
- Negative + Imperative + Negative:		Cat should not not eat		> -Nòminò
- Negative + Conditional + Negative:		Cat may not not eat			> -Nòkinò
- Negative + Conditional + Imperative:	Cat may have to (not eat)	> -Nòkimi
- Conditional + Negative + Imperative:	Cat may not (have to eat)	> -Kinòmi
- Conditional + Imperative + Negative:	Cat may (not have to eat)	> -Kiminò
- Negative + Conditional + Imperative + Negative:	Cat may (not have to (not eat))	> -Nòkiminò
- Conditional + Negative + Imperative + Negative:	Cat may not (not have to eat)	> -Kinòminò
- Negative + Conditional + Negative + Imperative:	Cat may not (have to (not eat))	> -Nòkinòmi
- Negative + Conditional + Negative + Imperative + Negative:	Cat may not (not have to (not eat))	> -Nòkinòminò
+--Modes can be combinated:
+ Negative + Conditional:    Cat (may not) eat     > -Nòki   (estimated low chance (0% > 20%) for affirmative equivalent)
+ Conditional + Negative:    Cat may (not eat)     > -Kinò   (estimated bad chance (20% > 49%) for affirmative equivalent)
+ Neg. + Conditional + Neg.: Cat may not (not eat) > -Nòkinò (estimated high chance (80% > 100%) for affirmative equivelent)
+
+ Negative + Imperative:    Cat (should not) eat > -Nòmi
+ Imperative + Negative:	   Cat should (not eat) > -Minò
+ Conditional + Imperative: Cat may have to eat  > -Kimi
+ Negative + Imperative + Negative:    Cat (should not) (not eat)    > -Nòminò
+ Negative + Conditional + Imperative: Cat may have to (not eat) > -Nòkimi
+ Conditional + Negative + Imperative: Cat (may not) (have to eat) > -Kinòmi
+ Conditional + Imperative + Negative: Cat may (not have to eat) > -Kiminò
+ Negative + Conditional + Imperative + Negative: Cat may (not have to (not eat)) > -Nòkiminò
+ Conditional + Negative + Imperative + Negative: Cat may not (not have to eat)   > -Kinòminò
+ Negative + Conditional + Negative + Imperative: Cat may not (have to (not eat)) > -Nòkinòmi
+ Negative + Conditional + Negative + Imperative + Negative: Cat may not (not have to (not eat)) > -Nòkinòminò
 --
 
 4- Tempse
-None/General: Cat eat	> No particle
-Past: Cat was eating	> -Sù
-Future: Cat will eat	> -Fù
-Past progressive: <not in english>		> -Zù  		(has started in the past, is finishing now or in the future (no information))
-Present Progressive: Cat is eating		> -Zùvù		(has started in the past, and will finish in the future)
-Future progressive: <not in english>	> -Vù		(will finish in the future, is beginning or has begun in the past (no information))
+None/General: Cat eat > No particle
+Past: Cat was eating  > -Sù
+Future: Cat will eat  > -Fù
+Past progressive: <not in english>   > -Zù   (has started in the past, is finishing now or in the future (no information))
+Present Progressive: Cat is eating   > -Zùvù (has started in the past, and will finish in the future)
+Future progressive: <not in english> > -Vù   (will finish in the future, is beginning or has begun in the past (no information))
 
 Tempses are combinable. First tempse used is stronger, last is weak.
-Past + Future (Future in the past): Cat was going to eat	> -Sùfù
-Future + Past (Past in the furute): Cat will have eaten		> -Fùsù
-Past + Past (Past in the past): Cat had eaten				> -Sùsù
-Past + Present Progressive: The cat was eating				> -Sùzùvù
-Past + Future + Past (Before future in the past): The cat was going to have eaten	> -Sùfùsù
-Past + Future + Future Progressive: The cat was going to be eating					> -Sùfùzù
-Past + Future + Past Progressive: The cat was going to end to be eating				> -Sùfùvù
+Past + Future (Future in the past): Cat was going to eat > -Sùfù
+Future + Past (Past in the furute): Cat will have eaten  > -Fùsù
+Past + Past (Past in the past): Cat had eaten            > -Sùsù
+Past + Present Progressive: The cat was eating           > -Sùzùvù
+Past + Future + Past (Before future in the past): The cat was going to have eaten > -Sùfùsù
+Past + Future + Future Progressive: The cat was going to be eating                > -Sùfùzù
+Past + Future + Past Progressive: The cat was going to end to be eating           > -Sùfùvù
 ...
 
 Past+Past+Past > Past+Past > Past+Past+Future ># Past #
@@ -107,5 +122,27 @@ Past+Past+Past > Past+Past > Past+Past+Future ># Past #
 How to count things:
 ---------------------
 
-There are 42 cats.	(Cat; 42; Be + Passive)
-This is the 42th cat.	(Cat; <nth> + 42; Be + Passive)
+Counting in base 6 (0, 1, 2, 3, 4, 5, 10, 11, ..., 15, 20, ..., 54, 55, 100, ...)
+Single digit number said simply as the digit itself (as english)
+	Engl: There is 2 persons
+	Meta: Person, 2, Be + Passive
+	Actu: <Person> Ke <Be>Pa
+
+First saying the lower weight number, and last the heigher power one.
+	Engl: 6              15      137
+	Meta: 01 (0 + 1*6)   32      543 (5 + 4*6 + 3*6^2)
+	Actu: Tcu Sa         Tù Ke   Po Tcu Mi
+
+The word 'Xe' allows to count how many unsignifiant digits (or zeroes) there is in the number.
+	Engl: 36 (100 in b6)   66 096 (1 230 000 in b6)
+	Meta: 2 Xe 1           4 Xe 321  (4 zeroes and then 3, 2 and 1)
+	Actu: Ke Xe Sa         Mi Xe Tù Ke Sa
+
+The number before 'Xe' specifying the number of unsignifiant digits can also be a huge number, and so there can be a serie of 'Xe' for huge numbers
+	Engl: ~1.26357x10^19   (= (4+2*6)x6^(5+3*6); in english notation of base 6: 24e^35)
+	Meta: 53 Xe 42         ([5 and 3 as a number] zeroes after a 4 and a 2)
+	Actu: Po Tù Xe Mi Ke
+
+	Engl: <Huge> (= 5*(4*6^(3*6^(2*6)); in english notation of base 6: 5e^(4e^(3e^2))) )
+	Meta: 2 Xe 3 Xe 4 Xe 5    ("[[2 zeroes after a 3] of zeroes after a 4] of zeroes after a 5")
+	Actu: Ke Xe Tù Xe Mi Xe Po
