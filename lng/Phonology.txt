@@ -7,10 +7,10 @@ written | IPA  | like in word (between brackets)
 --------+------+--------------------------------------------------------
 A       | aɑɒæ | p[â]ttes, t[a], m[a]man, p[a]pa
 E       | eɛ   | f[ê]te, f[ait], f[ée]
-Ù (Ou*) | uw   | s[ous], p[ou]le, p[ou]r, [ou]i, po[w]er
+U (Ou*) | uw   | s[ous], p[ou]le, p[ou]r, [ou]i, po[w]er
 I       | ij   | n[id], r[î]mes, l[i]gne, [hi]er, a[il], b[ille], [y]eux
 O       | oɔ   | s[eau], s[o]rt
-U       | y    | m[û]le, d[u]
+Ù       | y    | m[û]le, d[u]
 È (Eu*) | əøœ  | m[eu]le, c[e], s[oeu]r
 Ò (On*) | ɔ̃    | s[on]
 À (An*) | ɑ̃    | s[ans], p[en]dule
@@ -56,3 +56,23 @@ Double consonants can be:
 Double consonants are less frequent than single consonants.
 
 Double consonants combinations Weak+Strong or Strong+Weak does not exists.
+
+
+-----------------------------
+
+How to pronounce alphabet letters to spell words:
+
+A > xa     À > xà
+E > xe     È > xè
+U > xu     Ù > xù
+I > xi     Ì > xì
+O > xo     Ò > xò
+S > se     Z > za
+K > ke     G > ga
+T > te     D > da
+M > me     N > na
+P > pe     B > ba
+X > exe    H > ha       (x > exe to avoid ambiguity with e > xe)
+C > ce     J > ja
+F > fe     V > va
+R > re     L > la

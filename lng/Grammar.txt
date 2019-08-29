@@ -96,20 +96,20 @@ Interrogative: Is the cat eating ? > -Zè
 
 4- Tempse
 None/General: Cat eat > No particle
-Past: Cat was eating  > -Sù
-Future: Cat will eat  > -Fù
-Past progressive: <not in english>   > -Zù   (has started in the past, is finishing now or in the future (no information))
-Present Progressive: Cat is eating   > -Zùvù (has started in the past, and will finish in the future)
-Future progressive: <not in english> > -Vù   (will finish in the future, is beginning or has begun in the past (no information))
+Past: Cat was eating  > -Su
+Future: Cat will eat  > -Fu
+Past progressive: <not in english>   > -Zu   (has started in the past, is finishing now or in the future (no information))
+Present Progressive: Cat is eating   > -Zuvu (has started in the past, and will finish in the future)
+Future progressive: <not in english> > -Vu   (will finish in the future, is beginning or has begun in the past (no information))
 
 Tempses are combinable. First tempse used is stronger, last is weak.
-Past + Future (Future in the past): Cat was going to eat > -Sùfù
-Future + Past (Past in the furute): Cat will have eaten  > -Fùsù
-Past + Past (Past in the past): Cat had eaten            > -Sùsù
-Past + Present Progressive: The cat was eating           > -Sùzùvù
-Past + Future + Past (Before future in the past): The cat was going to have eaten > -Sùfùsù
-Past + Future + Future Progressive: The cat was going to be eating                > -Sùfùzù
-Past + Future + Past Progressive: The cat was going to end to be eating           > -Sùfùvù
+Past + Future (Future in the past): Cat was going to eat > -Sufu
+Future + Past (Past in the furute): Cat will have eaten  > -Fusu
+Past + Past (Past in the past): Cat had eaten            > -Susu
+Past + Present Progressive: The cat was eating           > -Suzuvu
+Past + Future + Past (Before future in the past): The cat was going to have eaten > -Sufusu
+Past + Future + Future Progressive: The cat was going to be eating                > -Sufuzu
+Past + Future + Past Progressive: The cat was going to end to be eating           > -Sufuvu
 ...
 
 Past+Past+Past > Past+Past > Past+Past+Future ># Past #
@@ -131,18 +131,18 @@ Single digit number said simply as the digit itself (as english)
 First saying the lower weight number, and last the heigher power one.
 	Engl: 6              15      137
 	Meta: 01 (0 + 1*6)   32      543 (5 + 4*6 + 3*6^2)
-	Actu: Tcu Sa         Tù Ke   Po Tcu Mi
+	Actu: Tcù Sa         Tu Ke   Po Tcù Mi
 
 The word 'Xe' allows to count how many unsignifiant digits (or zeroes) there is in the number.
 	Engl: 36 (100 in b6)   66 096 (1 230 000 in b6)
 	Meta: 2 Xe 1           4 Xe 321  (4 zeroes and then 3, 2 and 1)
-	Actu: Ke Xe Sa         Mi Xe Tù Ke Sa
+	Actu: Ke Xe Sa         Mi Xe Tu Ke Sa
 
 The number before 'Xe' specifying the number of unsignifiant digits can also be a huge number, and so there can be a serie of 'Xe' for huge numbers
 	Engl: ~1.26357x10^19   (= (4+2*6)x6^(5+3*6); in english notation of base 6: 24e^35)
 	Meta: 53 Xe 42         ([5 and 3 as a number] zeroes after a 4 and a 2)
-	Actu: Po Tù Xe Mi Ke
+	Actu: Po Tu Xe Mi Ke
 
 	Engl: <Huge> (= 5*(4*6^(3*6^(2*6)); in english notation of base 6: 5e^(4e^(3e^2))) )
 	Meta: 2 Xe 3 Xe 4 Xe 5    ("[[2 zeroes after a 3] of zeroes after a 4] of zeroes after a 5")
-	Actu: Ke Xe Tù Xe Mi Xe Po
+	Actu: Ke Xe Tu Xe Mi Xe Po
