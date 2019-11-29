@@ -1,27 +1,31 @@
-const memSize = 8 // Resent to itself at each computation
+const memSize = 4 // Resent to itself at each computation
 
 /*
- =7 : Last validated move (wait, mv_u, mv_d, mv_l, mv_r, rt_l, rt_r)
- +1 : current rotation (u, d, l, r)
+  7 : Last validated move (wait, mv_u, mv_d, mv_l, mv_r, rt_l, rt_r)
+ +4 : current rotation (u, d, l, r)
  +8 : Next Wall (u, d, l, r, ul, ur, dl, dr)
  +8 : Next Player (u, d, l, r, ul, ur, dl, dr)
  +8 : Next Coin (u, d, l, r, ul, ur, dl, dr)
  +8 : Next Hidden (u, d, l, r, ul, ur, dl, dr)
 */
-const inputs = 40 + memSize
+const inputs = (7+4+8+8+8+8) + memSize
 
 /*
- 1. Wait
- 4. Jump/Move (up, down, left, right)
- 2. Rotate (down-left, down-right)
+  1 Wait
+ +4 Jump/Move (up, down, left, right)
+ +2 Rotate (down-left, down-right)
 */
-const outputs = 7 + memSize
+const outputs = (1+4+2) + memSize
 
-const hiddenLayers = [16] // input>[first, ..., last]>output
+// input>[first, ..., last]>output
+const hiddenLayers = [4, 4]
 
-const evolRatio = 1 / 256 // ]0-1[ (More = faster changes, Less = precise changes)
+const evolChance = 1 / 8 // ]0-1[ Chance that neuron change its value by a evolRatio
+const evolRatio = 1 / 64 // ]0-1[ (More = faster changes, Less = precise changes)
 
 function Genetic(inheritance) {
+	const rnd = new Random();
+
 	/*
 		[0]: Links between input and hidden 0
 			[0]: Links from input to neuron 0 of hidden 0
@@ -57,18 +61,21 @@ function Genetic(inheritance) {
 	this.buildOutput = function(input, memory) {
 		// Building input
 		const inpt = []
-		for(let a of ['wait', 'mv_u', 'mv_l', 'mv_d', 'mv_r', 'rt_l', 'rt_r']) inpt.push(input.last === a ? 1 : -1)
+		for(let a of ['wait', 'mv_u', 'mv_l', 'mv_d', 'mv_r', 'rt_l', 'rt_r'])
+			inpt.push(input.last === a ? 1 : -1)
 
-		for(let r = 0; r <= 3; r++) inpt.push(input.rot === r ? 1 : -1)
+		for(let r = 0; r <= 3; r++)
+			inpt.push(input.rot === r ? 1 : -1)
 
 		for(let o of ['u', 'l', 'd', 'r', 'ul', 'ur', 'dl', 'dr']) {
-			inpt.push(!input.next[o][0] ? -1 : 2 / input.next[o][0] - 1)
-			inpt.push(!input.next[o][1] ? -1 : 2 / input.next[o][1] - 1)
-			inpt.push(!input.next[o][3] ? -1 : 2 / input.next[o][3] - 1)
-			inpt.push(!input.next[o][4] ? -1 : 2 / input.next[o][4] - 1)
+			inpt.push(input.next[o][0] ? 2 / input.next[o][0] - 1 : -1)
+			inpt.push(input.next[o][1] ? 2 / input.next[o][1] - 1 : -1)
+			inpt.push(input.next[o][3] ? 2 / input.next[o][3] - 1 : -1)
+			inpt.push(input.next[o][4] ? 2 / input.next[o][4] - 1 : -1)
 		}
 
-		for(let i = 0; i < memory.length; i++) inpt.push(memory[i])
+		for(let i = 0; i < memory.length; i++)
+			inpt.push(memory[i])
 
 		// compute througth network
 		const otpt = this.arrOutput(inpt)
@@ -85,18 +92,19 @@ function Genetic(inheritance) {
 		}
 	}
 
-	this.arrOutput = function(input) {
-		let otpt = input
+	this.arrOutput = function(otpt) {
 		for(let sl = 0; sl < this.genes.length; sl++) {
 			//console.log(otpt)
-			let inpt = [1, ...otpt]
+			const inpt = otpt;
 			otpt = []
+			inpt.unshift(1)
+
 			for(let sg = 0; sg < this.genes[sl].length; sg++) {
 				otpt[sg] = 0
 
 				//console.log(inpt.length, this.genes[sl][sg].length)
-
-				for(let s = 0; s < this.genes[sl][sg].length; s++) otpt[sg] += inpt[s] * this.genes[sl][sg][s]
+				for(let s = 0; s < this.genes[sl][sg].length; s++)
+					otpt[sg] += inpt[s] * this.genes[sl][sg][s]
 
 				// FONCTION D'ACTIVATION
 				// otpt[sg] = sigmoid(otpt[sg])
@@ -138,19 +146,21 @@ function Genetic(inheritance) {
 				// s: synapse
 				for(let s = 0; s < inheritance[0][sl][sg].length; s++) {
 					let total = 0
-					let chance = Math.random() * 2 - 1 // -1 to 1
+					for(let i = 0; i < inheritance.length; i++)
+						total += inheritance[i][sl][sg][s]
 
-					for(let i = 0; i < inheritance.length; i++) total += inheritance[i][sl][sg][s]
-
-					this.genes[sl][sg][s] = (total / nb) * (1 - evolRatio) + chance * evolRatio
+					if(rnd.next() < evolChance)
+						this.genes[sl][sg][s] = total * (1 - evolRatio) / nb + (rnd.next(1, -1) * evolRatio)
+					else
+						this.genes[sl][sg][s] = total / nb
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		// random generation
 		this.genes.push([inputs, hiddenLayers[0]])
-		for(let l = 1; l < hiddenLayers.length; l++) this.genes.push([hiddenLayers[l - 1], hiddenLayers[l]])
+		for(let l = 1; l < hiddenLayers.length; l++)
+			this.genes.push([hiddenLayers[l - 1], hiddenLayers[l]])
 		this.genes.push([hiddenLayers[hiddenLayers.length - 1], outputs])
 
 		// sl: synapse layer
@@ -161,15 +171,12 @@ function Genetic(inheritance) {
 			for(let sg = 0; sg < size1; sg++) {
 				this.genes[sl][sg] = []
 				// s: synapse
-				for(let s = 0; s < size0; s++) this.genes[sl][sg][s] = Math.random() * 2 - 1
+				for(let s = 0; s < size0; s++)
+					this.genes[sl][sg][s] = rnd.next(-0.01,0.01) //rnd.next(1, -1)
 			}
 		}
 	}
 
-}
-
-function min0(a, b) {
-	return a <= 0 ? b : (b <= 0 ? a : (a < b ? a : b))
 }
 
 function generateAIPlayer(grid) {
@@ -179,12 +186,15 @@ function generateAIPlayer(grid) {
 	p.gen = new Genetic() // in player so that it can be modified dynamically without need to rebuild onAskForAction
 	p.wrongMoves = 0
 	let memory = []
-	for(let i = 0; i < memSize; i++) memory.push(0)
+	for(let i = 0; i < memSize; i++)
+		memory.push(0)
 	let lastAction = 'wait'
 
 	p.onAskForAction = () => {
 		const input = {
-			last: lastAction, rot: p.getRotation(), next: p.getSurroundings(),
+			last: lastAction,
+			rot: p.getRotation(),
+			next: p.getSurroundings(),
 		}
 
 		const out = p.gen.buildOutput(input, memory)
@@ -193,8 +203,10 @@ function generateAIPlayer(grid) {
 		const acts = ['wait', 'mv_u', 'mv_l', 'mv_d', 'mv_r', 'rt_l', 'rt_r']
 		acts.sort((a, b) => out[b] - out[a])
 		let act
-		while(!p.doAction(act = acts.shift())) p.wrongMoves++
+		while(!p.doAction(act = acts.shift()))
+			p.wrongMoves++
 		lastAction = act
 	}
+
 	return p
 }

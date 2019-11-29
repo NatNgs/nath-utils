@@ -6,10 +6,10 @@ const board = new Board()
 let display = null
 
 const defaultParams = {
-	wallChance: 0.2,
-	size: 7,
-	coinsNumber: 20,
-	seed: 42,
+	wallChance: 0.15,
+	size: 5,
+	coinsNumber: 5,
+	seed: 0,
 	astroCollide: false,
 	maxTurns: 50,
 	onEnd: null,

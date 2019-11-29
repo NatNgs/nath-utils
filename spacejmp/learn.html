@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<style>
+		#testTable button {
+			display: block;
+			background-color: white;
+			border: 1px dotted gray;
+			font-size: 10px;
+			padding: 1px;
+			width: 24px !important;
+			height: 24px;
+			color: black;
+		}
+		#testTable button.player {
+			color: darkgreen;
+			border: 1px solid green;
+		}
+		#testTable button.objective {
+			color: orange;
+			border: 1px dashed orange;
+		}
+		#testTable button.wall {
+			color: lightgray;
+			border: 3px double black;
+			padding: 0;
+		}
+	</style>
+	<script src="http://unpkg.com/brain.js"></script><!-- https://github.com/BrainJS/brain.js -->
+	<script>
+		// Setup
+		const settings = {
+			hiddenLayers: [5],
+			inputSize: 9,
+			outputSize: 8,
+			activation: 'relu',
+		};
+		let net = new brain.NeuralNetwork(settings);
+
+		function save() {
+			document.getElementById('save').value = JSON.stringify(net.toJSON());
+		}
+		function load() {
+			try {
+				net.fromJSON(JSON.parse(document.getElementById('save').value));
+				train(prep(1), 1)
+				alert('Import Success.');
+			} catch(ignored) {
+				alert('Import Failed.');
+			}
+		}
+
+		function prep(howMuch) {
+			const o = [];
+			for(let i=0; i<howMuch; i++) {
+				for(let j=0; j<dataset.length; j++) {
+					o.push(prep1(dataset[j]));
+				}
+			}
+			return o;
+		}
+		function train(data, iters) {
+			iters = iters||1;
+			const a = net.train(data, {
+				iterations: iters, // the maximum times to iterate the training data --> number greater than 0
+				errorThresh: 0.001, // the acceptable error percentage from training data --> number between 0 and 1
+				timeout: 10000, // the max number of milliseconds to train for --> number greater than 0
+				learningRate: 0.3, // scales with delta to effect training rate --> number between 0 and 1
+			});
+			update(a);
+
+			// Save status
+			setTimeout(save, 0);
+			
+			// refresh table
+			onClickTestTable(0, 0);
+		}
+
+		function update(data) {
+			document.getElementById('step').innerHTML = data.iterations;
+			document.getElementById('error').innerHTML = data.error;
+		}
+
+		function fmtDist(dist) {
+			if(!dist) {
+				return 0;
+			}
+			return 
+		}
+		function iptRnd(min, max) {
+			const a = Math.random();
+			if(a > 0.75) {
+				return max;
+			} else if(a > 0.5) {
+				return min;
+			}
+			return (a*2)*(max-min)+min;
+		}
+		function iptChc(... vals) {
+			return vals[(Math.random() * vals.length)|0];
+		}
+		const dataset = [
+			'1.1,0>1,0>0.5,0>1,0/1,0/1,1,0,0,-1>1,,1,,,,,1,',
+			'1.2,0>1,0>0.5,0>1,0/1,0/1,0,-1>1,1,1,,1,,,,,,1',
+			'2.1,0>1,0>1,0>0.5,0/1,0/1,1,1,0,-1>1,,,1,,,,1,',
+			'2.2,0>0.5,0>1,0>1,0/1,0/1,1,-1,0,-1>1,1,,,,,,1,',
+			'3.1,0>1,0>1,0>0.5,0/1,1,0.71,0.50,0,-1>1,,,,,,1,1,',
+			'3.2,0>0.5,0>1,0>1,1,0/1,0.71,-0.50,0,-1>1,,,,1,,,1,',
+			'4.1,0>0.5,0>1,0>0.25,0/1,0/1,1,-1,0.5,1,1,,,,,,1,',
+			'4.2,0>0.25,0>1,0>0.5,0/1,0/1,1,1,0.5,-1,,,1,,,,1,',
+			'4.3,0>0.25,0>1,0>0.5,0/1,0/1,0.5,-1,1,1,,,1,,,,,1',
+			'4.4,0>0.5,0>1,0>0.25,0/1,0/1,0.5,1,1,-1,1,,,,,,,1',
+			'5.1,0>1,0>0.5,0>0.25,0/1,0/1,1,0,0.5,1,,1,,,,,1,',
+			'5.2,0>0.25,0>0.5,0>1,0/1,0/1,1,0,0.5,-1,,1,,,,,1,',
+			'5.3,0>0.5,0>0.25,0>1,0/1,0/1,1,1,0.5,0,,,1,,,,1,',
+			'5.4,0>1,0>0.25,0>0.5,0/1,0/1,1,-1,0.5,0,1,,,,,,1,',
+			'5.5,0>1,0>0.25,0>0.5,0/1,0/1,0.5,0,1,1,,,1,,,,,1',
+			'5.6,0>0.5,0>0.25,0>1,0/1,0/1,0.5,0,1,-1,1,,,,,,,1',
+			'5.7,0>1,0>0.5,0>0.25,0/1,0/1,0.5,1,1,0,,1,,,,,,1',
+			'5.8,0>0.25,0>0.5,0>1,0/1,0/1,0.5,-1,1,0,,1,,,,,,1',
+			'10,1,1,1,0,0,-1>1,-1>1,-1>1,-1>1,,,,,1,,0.5,0.5',
+			'11.1,1,1,0>0.5,0,0,-1>1,-1>1,-1>1,-1>1,,,1,,,,0.5,0.5',
+			'11.2,0>0.5,1,1,0,0,-1>1,-1>1,-1>1,-1>1,1,,,,,,0.5,0.5',
+		];
+
+		function test(csv) {
+			const values = csv.split(',').map(parseCode);
+			return net.run(values);
+		}
+		function prep1(csv) {
+			// Title,
+			// Left dist, Right dist, Top dist, Left rot ?, Right rot ?, O1 dist, O1 angle, O2 dist, O2 angle
+			// Mv left ?, Mv Top ?, Mv Right ?, wait ?, Rt Left ?, Rt right ?, Go to O1 ?, Go to O2 ?
+			const values = csv.split(',');
+			values.shift(); // remove title
+			return {
+				input: values.slice(0, settings.inputSize).map(parseCode),
+				output: values.slice(settings.inputSize, settings.inputSize + settings.outputSize).map(parseCode),
+			};
+		}
+		const parseCode = function(v) {
+			if(v.indexOf('>') > 0) {
+				const sp = v.split('>');
+				return iptRnd(+sp[0], +sp[1]);
+			}
+			if(v.indexOf('/') > 0) {
+				const sp = v.split('/');
+				return iptChc(+sp[0], +sp[1]);
+			}
+			return +v
+		};
+
+		const testGrid = {};
+		function init() {
+			// prepare testTable
+			let content = '';
+			for(let y=3; y>=-3; y--) {
+				content += '<tr>';
+				for(let x=-3; x<=3; x++) {
+					content += '<td><button id="c_'+ x + '_' + y + '" onclick="onClickTestTable('+ x + ', '+ y +')">&nbsp;</button></td>';
+					testGrid[x+'_'+y] = 0; // AIR
+				}
+				content += '</tr>';
+			}
+			document.getElementById('testTable').innerHTML = content;
+			document.getElementById('c_0_0').disabled = 'disabled';
+			document.getElementById('c_0_-1').disabled = 'disabled';
+
+			testGrid['0_0'] =  0b1000; // Player
+			testGrid['0_-1'] = 0b001; // Wall
+			testGrid['-2_0'] = 0b010; // Objective1
+			testGrid['2_0'] = 0b010; // Objective2
+		}
+
+		function onClickTestTable(x, y) {
+			const elem = document.getElementById('c_'+ x +'_'+ y);
+
+			// spe case if player location or block under player location
+			if(!(x === 0 && y===-1 || x===0 && y===0)) {
+				const v = testGrid[x+'_'+y];
+				if(v&0b001) {
+					testGrid[x+'_'+y] ^= 0b011;
+				} else if(v&0b010) {
+					testGrid[x+'_'+y] ^= 0b010;
+				} else {
+					testGrid[x+'_'+y] ^= 0b001;
+				}
+			}
+		
+			// prepare test if possible
+			const runs = []; // list of {o1: {x:.., y:..}, o2:{x:.., y:..}, input: <CSV>}
+			const chances = {};
+
+			// find objectives
+			const objectives = [];
+			const ochances = [];
+			for(let x=-3; x<=3; x++) {
+				for(let y=-3; y<=3; y++) {
+					if(testGrid[x+'_'+y]&0b010) {
+						objectives.push({x: x, y: y, value: 0});
+						ochances.push(0);
+					}
+					chances[x+'_'+y]=0;
+				}
+			}
+
+			if(objectives.length > 0) {
+				// wall distances
+				const inputs = [
+					testGrid['-1_0']&0b001?1 :testGrid['-2_0']&0b001?.5 :testGrid['-3_0']&0b001?.25 :0,
+					testGrid['0_1']&0b001?1 :testGrid['0_2']&0b001?.5 :testGrid['0_3']&0b001?.25 :0,
+					testGrid['1_0']&0b001?1 :testGrid['2_0']&0b001?.5 :testGrid['3_0']&0b001?.25 :0,
+					testGrid['-1_-1']&0b001 + testGrid['-1_0']&0b001 === 0 ?1 :0,
+					testGrid['1_-1']&0b001 + testGrid['1_0']&0b001 === 0 ?1 :0,
+				];
+				const lo = inputs.length;
+
+				// with 1 input
+				for(let o1_i=0; o1_i<objectives.length; o1_i++) {
+					const o1 = objectives[o1_i];
+					inputs[lo+0] = Math.sqrt(o1.x * o1.x + o1.y * o1.y) * (o1.x < 0 ? -1 : 1);
+					inputs[lo+1] = (Math.atan2(o1.y, Math.abs(o1.x)) - Math.PI/2) * (-Math.PI/2);
+					inputs[lo+2] = 0;
+					inputs[lo+3] = '-1>1';
+					runs.push({o1: o1_i, o2: null, input: inputs.join(',')});
+				}
+
+				// with 2 inputs
+				for(let o1_i=0; o1_i<objectives.length-1; o1_i++) {
+					for(let o2_i=o1_i+1; o2_i<objectives.length; o2_i++) {
+						const o1 = objectives[o1_i];
+						const o2 = objectives[o2_i];
+						inputs[lo+0] = Math.sqrt(o1.x * o1.x + o1.y * o1.y) * (o1.x < 0 ? -1 : 1);
+						inputs[lo+1] = (Math.atan2(o1.y, Math.abs(o1.x)) - Math.PI/2) * (-Math.PI/2);
+						inputs[lo+2] = Math.sqrt(o2.x * o2.x + o2.y * o2.y) * (o2.x < 0 ? -1 : 1);
+						inputs[lo+3] = (Math.atan2(o2.y, Math.abs(o2.x)) - Math.PI/2) * (-Math.PI/2);
+						runs.push({o1: o1_i, o2: o2_i, input: inputs.join(',')});
+						// reverse
+						let tmp = inputs[lo+2];
+						inputs[lo+2] = inputs[lo+0];
+						inputs[lo+0] = tmp;
+						tmp = inputs[lo+3];
+						inputs[lo+3] = inputs[lo+1];
+						inputs[lo+1] = tmp;
+						runs.push({o1: o2_i, o2: o1_i, input: inputs.join(',')});
+					}
+				}
+			}
+
+			if(runs.length > 0) {
+				let sum = 0;
+				// Compute scores
+				while(runs.length) {
+					const run = runs.shift();
+					const res = test(run.input);
+					chances['-1_0'] += res[0];
+					chances['0_1'] += res[1];
+					chances['1_0'] += res[2];
+					chances['-1_-1'] += res[3];
+					chances['0_0'] += res[4];
+					chances['1_-1'] += res[5];
+					objectives[run.o1].value += res[6];
+					if(run.o2)
+						objectives[run.o2].value += res[7];
+
+					for(let k=0; k<6; k++)
+						sum += res[k];
+				}
+
+				// Normalize scores
+				for(let key in chances) {
+					chances[key] /= sum;
+				}
+			}
+
+			// display grid
+			for(let x=-3; x<=3; x++) {
+				for(let y=-3; y<=3; y++) {
+					let cls = [];
+					let xy = x+'_'+y;
+					if(testGrid[xy]&0b001) cls.push('wall');
+					if(testGrid[xy]&0b010) cls.push('objective');
+					if(testGrid[xy]&0b1000) cls.push('player');
+					const elem = document.getElementById('c_'+ xy);
+					elem.className = cls.join(' ');
+					if(y>1 || y<-1 || x>1 || x<-1 || y===1&&x!==0 || x===0&&y===-1 && runs.length > 0)
+						continue;
+					elem.style.background = 'rgb(255, 255, '+ (256-(chances[xy]*256)|0) +')';
+					elem.innerHTML = ((chances[xy]*99)|0) || '';
+				}
+			}
+		}
+	</script>
+</head>
+<body onload="init()">
+	<hr/>
+	Step: <span id="step">0</span><br/>
+	Error: <span id="error">?</span>
+	<hr/>
+	Test:<br/>
+	<table id="testTable"></table>
+	<hr/>
+	Save: <br/><textarea id="save" style="width: 90%; height: 25em;"></textarea>
+	<button onclick="load()">Load</button>
+</body>
+</html>

@@ -61,7 +61,7 @@ function Player() {
 	 */
 	this.onAskForAction = () => {
 		const moves = ['wait', 'mv_u', 'mv_d', 'mv_l', 'mv_r', 'rt_l', 'rt_r']
-		while(!this.doAction(moves[(Math.random() * moves.length) | 0])) ;
+		while(!this.doAction(moves[(Math.random() * moves.length) | 0]));
 	}
 
 	this.addObserver = function(newObserver) {

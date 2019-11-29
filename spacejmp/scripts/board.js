@@ -7,7 +7,7 @@ const mapActionToCode = {
 
 
 function idOf(x, y) {
-	return 'c' + x + '_' + y
+	return `${x}_${y}`
 }
 
 /**
@@ -49,9 +49,9 @@ function Board() {
 	const allPlayers = []
 	const allAstros = []
 	const observers = []
+	const score = new Map()
 	const walls = new Set()
 	const coins = new Set()
-	const score = new Map()
 
 	let currTurn
 	let rnd
@@ -60,18 +60,19 @@ function Board() {
 	this.launch = function() {
 		if(THIS.maxTurns > 0 && currTurn >= THIS.maxTurns) {
 			currTurn = 0
-			if(THIS.onEnd) THIS.onEnd()
+			if(THIS.onEnd)
+				THIS.onEnd()
 		} else {
 			currTurn++
-			turnA([...allAstros])
+			turnA()
 		}
 	}
 
 	this.getScores = function() {
-		const ret = []
-		for(let e of score.entries())
-			ret.push({name: e[0].name, pts: e[1]})
-		return ret
+		const scores = []
+		for(let s of score.keys())
+			scores.push({name: s.name, pts: score.get(s)})
+		return scores
 	}
 	this.softReset = function() {
 		const oldPlayers = []
@@ -92,16 +93,16 @@ function Board() {
 	this.reset = function() {
 		rnd = new Random(this.seed)
 
-		score.clear()
-		coins.clear()
-		walls.clear()
-
+		/// Clear all
 		currTurn = 0
 
-		/// Clear all
-		while(allPlayers.shift()) ;
-		while(allAstros.shift()) ;
-		while(observers.shift()) ;
+		coins.clear()
+		walls.clear()
+		score.clear()
+
+		while(allPlayers.shift());
+		while(allAstros.shift());
+		while(observers.shift());
 
 		/// Regenerate map
 		// Random walls
@@ -111,11 +112,11 @@ function Board() {
 					walls.add(idOf(i, j))
 
 		// world border
-		for(let i = -this.size + 1; i < this.size; i++) {
-			walls.add(idOf(i, -this.size))
-			walls.add(idOf(i, this.size))
-			walls.add(idOf(-this.size, i))
-			walls.add(idOf(this.size, i))
+		for(let i = -this.size; i < this.size; i++) {
+			walls.add(idOf(i, -this.size-1))
+			walls.add(idOf(i, this.size+1))
+			walls.add(idOf(-this.size-1, i))
+			walls.add(idOf(this.size+1, i))
 		}
 
 		// coins
@@ -135,15 +136,22 @@ function Board() {
 		if(flags & 1 && walls.has(id))
 			return WALL
 
+		if(flags & 4 && coins.has(id))
+			return COIN
+
 		if(flags & 2 && this.astroCollide)
 			for(let astro of allAstros)
 				if(astro.x === x && astro.y === y)
 					return ASTRO + astro.rot
 
-		if(flags & 4 && coins.has(idOf(x, y)))
-			return COIN
-
 		return false
+	}
+	this.isSomethingAround = function(x, y, flags, distAround = 1) {
+		for(let dx=-distAround; dx<=distAround; dx++)
+			for(let dy=-distAround; dy<=distAround; dy++)
+				if(this.getCell(x+dx, y+dy, flags))
+					return false
+		return true
 	}
 
 	this.addPlayer = function(player) {
@@ -155,9 +163,14 @@ function Board() {
 			astro.y = allAstros[0].y
 			astro.rot = allAstros[0].rot
 		} else {
+			let tries = 1000;
 			do {
-				astro.x = rnd.next(this.size - 1, -this.size - 1) | 0
-				astro.y = rnd.next(this.size - 1, -this.size - 1) | 0
+				if(--tries < 0) {
+					console.error('FAIL', walls, coins)
+					return;
+				}
+				astro.x = rnd.next(this.size - 1, -(this.size - 1)) | 0
+				astro.y = rnd.next(this.size - 1, -(this.size - 1)) | 0
 			} while(this.getCell(astro.x, astro.y, 0b111));
 
 			astro.rot = rnd.next(4) | 0
@@ -198,22 +211,22 @@ function Board() {
 	 * callback will return false and wait for another choice.
 	 * If was possible, callback will return true, and then will not accept any more call to it (will return true indefinitelly)
 	 */
-	const turnA = function(whoNext) {
-		if(whoNext.length <= 0) {
+	const turnA = function(whoNext = 0) {
+		if(whoNext > allAstros.length) {
 			setTimeout(THIS.launch, 0)
 			return
 		}
 
-		const curr = whoNext.shift()
+		const curr = allAstros[whoNext]
 
 		// Prepare callback
 		const next = () => {
 			if(THIS.getCell(curr.x, curr.y, 0b100)) {
 				coins.delete(idOf(curr.x, curr.y))
-				score.set(curr, score.get(curr) + 1)
+				score.put(curr, score.get(curr)+1)
 				addNewCoin(this)
 			}
-			setTimeout(() => turnA(whoNext), 0)
+			setTimeout(() => turnA(whoNext+1), 0)
 		}
 
 		// Update displays
@@ -239,10 +252,13 @@ function Board() {
 	const addNewCoin = function() {
 		let newX
 		let newY
+		let tries = 1000
 		do {
-			newX = ((rnd.next() * THIS.size * 2 - 1) - THIS.size + 1) | 0
-			newY = ((rnd.next() * THIS.size * 2 - 1) - THIS.size + 1) | 0
-		} while(THIS.getCell(newX, newY, 0b111));
+			newX = rnd.next(THIS.size -1, -(THIS.size -1)) | 0
+			newY = rnd.next(THIS.size -1, -(THIS.size -1)) | 0
+		} while(THIS.getCell(newX, newY, 0b111)
+			&& (tries < 0
+				|| THIS.isSomethingAround(newX, newY, 0b110)));
 		coins.add(idOf(newX, newY))
 	}
 }

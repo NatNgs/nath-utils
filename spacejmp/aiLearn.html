@@ -11,6 +11,14 @@
     <script src="scripts/mainLearn.js"></script>
     <script src="scripts/pseudorand.js"></script>
     <script>
+	    const SORTPTS = (a, b)=>
+	    	a.pts !== b.pts
+			    ? b.pts - a.pts
+			    : (a.wm !== b.wm
+				    ? a.wm - b.wm
+				    : b.when - a.when
+			    );
+
 		const players = {}
 		let when = 0
 		const params = {
@@ -26,43 +34,42 @@
 					p.wm = p.wrongMoves
 					p.wrongMoves = 0
 					return p
-				}).sort((a, b) => a.pts !== b.pts
-					? b.pts - a.pts
-					: (a.when !== b.when
-							? b.when - a.when
-							: a.wm - b.wm
-					),
-				)
+				}).sort(SORTPTS)
 
 				// Replace worst AI by new Genetic from first(s)
 				while (scores.length >= 2) {
 					// Take first (or firsts if same amount of points)
 					const bests = []
 					const limPts = scores[0].pts
-					while (scores.length > 0 && scores[0].pts >= limPts) {
-						const p = getByName(scores.shift().name)
-						bests.push(p.gen.genes)
-					}
+					while (scores.length > 0 && scores[0].pts >= limPts)
+						bests.push(scores.shift())
 
-					if (scores.length > 0) {
-						const p = getByName(scores.pop().name)
-						p.gen = new Genetic(bests)
+					if (scores.length) {
+						const p = scores.pop()
+						p.gen = new Genetic(bests.map(b=>b.gen.genes))
 						p.when = when
 						document.getElementById(p.name + '-inpt').value = p.gen.export()
-						document.getElementById(p.name + '-when').innerText = p.when
+						document.getElementById(p.name + '-when').innerText = when
+					} else {
+						while(bests.length) {
+							const p = bests.pop()
+							p.gen = new Genetic([p.gen.genes])
+							p.when = when
+							document.getElementById(p.name + '-inpt').value = p.gen.export()
+							document.getElementById(p.name + '-when').innerText = when
+						}
 					}
 				}
 
 				const checkEnd = document.getElementById('checkToStop')
 				const inptSeed = document.getElementById('seed')
 				if (!checkEnd.checked) {
-					inptSeed.value = (board.seed = (inptSeed.value | 0))
+					board.seed = (inptSeed.value | 0)
 					setTimeout(relaunch, 10)
 				} else {
 					checkEnd.checked = false
-					for (let e of document.getElementsByClassName('disableOnRun')) {
+					for (let e of document.getElementsByClassName('disableOnRun'))
 						e.disabled = undefined
-					}
 				}
 			},
 		}
@@ -70,6 +77,7 @@
 		let nextPid = 0
 
 		function addPlayer() {
+			let howManyAdd = document.getElementById("howManyAdd").value
 			const div = document.createElement('div')
 			const id = 'P' + (++nextPid)
 			div.id = id
@@ -80,6 +88,11 @@
 <span>Since</span> <span id="${id}-when">${when}</span>`
 			document.getElementById('playerList').appendChild(div)
 			players[id] = ''
+
+			if(--howManyAdd) {
+				document.getElementById("howManyAdd").value = howManyAdd
+				setTimeout(addPlayer, 10);
+			}
 		}
 
 		function updatePlayer(id) {
@@ -188,14 +201,15 @@
     <tr>
         <td>
             <label for='checkToStop'>Stop after next:</label><input id='checkToStop' type='checkbox'/>
-            <label for='seed'>Random Seed:</label><input id='seed' type='number' value='42'/>
+            <label for='seed'>Random Seed:</label><input id='seed' type='number' value='' placeholder="[Random]"/>
         </td>
     </tr>
     <tr>
         <td>
             <div id="playerList"></div>
             <!-- Todo: disable buttons when learning -->
-            <button onclick="addPlayer()" class="disableOnRun">+</button>
+            <input type="number" id="howManyAdd" value="1" min="1" max="100" />
+	        <button onclick="addPlayer()" class="disableOnRun">+</button>
             <button onclick="clickValidate()" class="disableOnRun">Validate and Launch</button>
         </td>
     </tr>
