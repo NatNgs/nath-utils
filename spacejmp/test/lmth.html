@@ -1,0 +1,261 @@
+<html>
+<head>
+	<title>Speso Kolena - TST</title>
+	<meta charset="UTF-8">
+	<script src="./rnn.js"></script>
+	<script>
+		const struct = [2, 1, 2];
+		const ps = [];
+		const outputToScore = [];
+		const nb = 1000;
+		let target = .5;
+
+		function init() {
+			if(ps.length > (nb-1)) {
+				ps.length = nb-1;
+			}
+			let copy = ps.length;
+			while(ps.length<(nb-1)) {
+				if(copy) {
+					const n = copyRNN(ps[(Math.random()*copy)|0]);
+					alterRNNnorm(n, .5, .1);
+					ps.push(n);
+				} else {
+					ps.push(new RNN([... struct]));
+				}
+			}
+			// Give advantage to first: One is always copy of first one, 
+			const n = copyRNN(ps[0]);
+			alterRNNnorm(n, 1/2, .1);
+			ps.push(n);
+		}
+
+		const tests = {}; // tests[name] = {inputs: <RNNin>, score: function(<RNNout>){ return <float 0 to 1> }}
+		function computeScore(test, output) {
+			const reducer = (x,a)=>x+a;
+			const score = test.expected.map((x,a)=>output[outputToScore.indexOf(x)]).reduce(reducer);
+			const total = output.reduce(reducer);
+			return score / total;
+		}
+		function runTests(testsList) {
+			for(let i=0; i<ps.length; i++) {
+				let min = Infinity;
+				let sum = 0;
+				for(let t=0; t<testsList.length; t++) {
+					const score = computeScore(testsList[t], ps[i].test(testsList[t].inputs));
+					if(score<min) min=score;
+					sum += score;
+				}
+				ps[i].score = (min + sum/testsList.length) /2;
+			}
+
+			// sort by score, best first, worst last
+			ps.sort((a, b) => a.score < b.score);
+		}
+
+		function runStage(testsList, cb) {
+			let max = 999;
+			const scoreDiv = document.getElementById('scores');
+			const run1 = function() {
+				runTests(testsList);
+				const successes = ps.filter(a=>a.score > target).length;
+
+				scoreDiv.innerHTML = 
+					'' + (1000-max) + ' tries. Successes: ' + successes + '/' + nb
+					+ '\nBest: '+ displayStruct(ps[0].layers) + ':' + (ps[0].score*100) + '%'
+					+ '\nWorst: '+ displayStruct(ps[ps.length-1].layers) + ':' + (ps[ps.length-1].score*100) + '%';
+
+				// Keep best 20%, Reject others failing and last 20%
+				ps.length = successes<nb*.2?nb*.2:(successes>nb*.8?nb*.8:successes);
+				init();
+				if(successes >= nb*.95 || !(max--)) {
+					console.log(scoreDiv.innerHTML)
+					return cb(max>0);
+				}
+				setTimeout(run1);
+			}
+			setTimeout(run1);
+		}
+		const runningList = [];
+		function runStages() {
+			const testsList = Object.values(tests);
+			const testList = [];
+			let i=-1;
+
+			function async(lastSuccess) {
+				i++;
+				if(i>=testsList.length) {
+					runningList.shift();
+					if(runningList.length) {
+						runningList[0]();
+					}
+					return;
+				}
+				if(!lastSuccess) {
+					addAllNeuron(1);
+				}
+				testList.push(testsList[i]);
+				runStage(testList, async);
+			}
+
+			runningList.push(()=>async(true));
+			if(runningList.length === 1) {
+				runningList[0]();
+			}
+		}
+
+		function displayStruct(structArray) {
+			return structArray[0] + '(' + structArray.slice(1, structArray.length-1).join('>') + ')' + structArray[structArray.length-1]
+		}
+		function addAllNeuron(layer, index=-1) {
+			for(let i=0; i<ps.length; i++) {
+				ps[i].addNeuron(layer, index, 0.01);
+			}
+			struct[layer]++;
+			console.log('Structure is now: ' + displayStruct(struct));
+		}
+		function addAllLayer(layerToCopy) {
+			for(let i=0; i<ps.length; i++) {
+				ps[i].addLayer(layerToCopy);
+			}
+			struct.splice(layerToCopy, 0, struct[layerToCopy]);
+			console.log('Structure is now: ' + displayStruct(struct));
+		}
+		function removeAllNeuron() {
+			for(let i=0; i<ps.length; i++) {
+				ps[i].removeLowerNeuron();
+			}
+		}
+	</script>
+	<style>
+		code {
+			display: block;
+			background: lightgray;
+			padding-left: 1em;
+			white-space: pre-wrap;
+		}
+	</style>
+</head>
+<body onload="init()">
+	<div id="scores" style="white-space: pre-wrap; position: fixed; top:0; left:0; padding: .5em; background: white"></div>
+
+	<div style="height: 99vh; margin-top: 5em;">
+	[Block under, Block above] > [Move down?, Move up?]:<code>
+// Update structure
+outputToScore.push('up');
+outputToScore.push('down');
+
+// Define new tests
+tests['Block below'] = {inputs: [1, 0], expected: ['up']};
+tests['Block above'] = {inputs: [0, 1], expected: ['down']};
+
+// Run
+runStages();
+	</code><br/>[Block under, Block above, Objective y] > [Move down?, Move up?]:<code>
+// Update structure		
+addAllNeuron(0); // input +1
+addAllNeuron(1); // hidden1 +1
+
+// Adapt last tests
+Object.values(tests).forEach(x=>x.inputs.push(0));
+
+// Define new tests
+tests['Objective above 1'] = {inputs: [0, 0, 1], expected: ['up']};
+tests['Objective below 1'] = {inputs: [0, 0,-1], expected: ['down']};
+tests['Ob&Block above 1'] = {inputs: [0,.5, 1], expected: tests['Objective above 1'].expected};
+tests['Ob&Block below 1'] = {inputs: [.5, 0, -1], expected: tests['Objective below 1'].expected};
+
+// Run
+runStages();
+	</code><br/>[Block under, Block above, O1.y, O2.y] > [Move down?, Move up?, Follow O1?, Follow O2?]:<code>
+// Update structure
+outputToScore.push('o1');
+outputToScore.push('o2');
+addAllNeuron(0); // input +1
+addAllNeuron(1); // hidden1 +1
+addAllNeuron(-1); // output +1
+addAllNeuron(-1); // output +1
+
+// Adapt last tests
+Object.values(tests).forEach(x=>x.inputs.push(0));
+tests['Objective above 1'].expected.push('o1');
+tests['Objective below 1'].expected.push('o1');
+
+// Define new tests
+tests['Objective above 2'] = {inputs: [0, 0, 0, 1], expected: ['up', 'o2']};
+tests['Objective below 2'] = {inputs: [0, 0, 0,-1], expected: ['down', 'o2']};
+tests['Ob&Block above 2'] = {inputs: [0, .5, 0, 1], expected: tests['Objective above 2'].expected};
+tests['Ob&Block below 2'] = {inputs: [.5, 0, 0,-1], expected: tests['Objective below 2'].expected};
+tests['Nearest Objective 1.1'] = {inputs: [0, 0, 1, .5], expected: tests['Objective above 1'].expected};
+tests['Nearest Objective 2.1'] = {inputs: [0, 0, .5, 1], expected: tests['Objective above 2'].expected};
+tests['Nearest Objective 1.2'] = {inputs: [0, 0,-1,-.5], expected: tests['Objective below 1'].expected};
+tests['Nearest Objective 2.2'] = {inputs: [0, 0,-.5,-1], expected: tests['Objective below 2'].expected};
+tests['Nearest Objective 1.1'] = {inputs: [0, 0, 1,-.5], expected: tests['Objective above 1'].expected};
+tests['Nearest Objective 2.1'] = {inputs: [0, 0,-.5, 1], expected: tests['Objective above 2'].expected};
+tests['Nearest Objective 1.2'] = {inputs: [0, 0,-1, .5], expected: tests['Objective below 1'].expected};
+tests['Nearest Objective 2.2'] = {inputs: [0, 0,.5, -1], expected: tests['Objective below 2'].expected};
+
+// Run
+runStages();
+	</code><br/>[Block under, Block above, Block left, Block right, O1.x, O1.y, O2.x, O2.y] > [Move down?, Move up?, Move Left?, Move right?, Follow O1?, Follow O2?]:<code>
+// Update structure
+addAllNeuron(0, 2); // input Block left
+addAllNeuron(0, 3); // input Block Right
+addAllNeuron(0, 4); // input O1.x
+addAllNeuron(0, 6); // input O2.x
+addAllNeuron(-1, 2); // output Left
+outputToScore.splice(2, 0, 'left');
+addAllNeuron(-1, 3); // output Right
+outputToScore.splice(3, 0, 'right');
+addAllNeuron(1); // hidden1 +1
+addAllLayer(1); // add new Layer
+
+// Adapt last tests
+tests['Block below'].inputs = [1, 0, 1, 1, 0, 0, 0, 0];
+tests['Block above'].inputs = [0, 1, 1, 1, 0, 0, 0, 0];
+tests['Objective above 1'].inputs = [0, 0, 1, 1, 0, 1, 0, 0];
+tests['Objective below 1'].inputs = [0, 0, 1, 1, 0,-1, 0, 0];
+tests['Ob&Block above 1'].inputs = [0,.5, 1, 1, 0, 1, 0, 0];
+tests['Ob&Block below 1'].inputs = [.5,0, 1, 1, 0,-1, 0, 0];
+tests['Ob&Block above 2'].inputs = [0, .5,0, 0, 0, 0, 0, 1];
+tests['Ob&Block below 2'].inputs = [.5, 0,0, 0, 0, 0, 0,-1];
+tests['Nearest Objective 1.1'].inputs = [0, 0, 0, 0, 0, 1, 0, .5];
+tests['Nearest Objective 2.1'].inputs = [0, 0, 0, 0, 0, .5, 0, 1];
+tests['Nearest Objective 1.2'].inputs = [0, 0, 0, 0, 0,-1, 0,-.5];
+tests['Nearest Objective 2.2'].inputs = [0, 0, 0, 0, 0,-.5, 0,-1];
+tests['Nearest Objective 1.1'].inputs = [0, 0, 0, 0, 0, 1, 0,-.5];
+tests['Nearest Objective 2.1'].inputs = [0, 0, 0, 0, 0,-.5, 0, 1];
+tests['Nearest Objective 1.2'].inputs = [0, 0, 0, 0, 0,-1, 0, .5];
+tests['Nearest Objective 2.2'].inputs = [0, 0, 0, 0, 0, .5, 0,-1];
+
+// Define new tests
+tests['Block left'] = {inputs: [1, 1, 1, 0, 0, 0, 0, 0], expected: ['right']};
+tests['Block right'] = {inputs: [1, 1, 0, 1, 0, 0, 0, 0], expected: ['left']};
+tests['Objective above 2'] = {inputs: [0, 1, 0, 0, 0, 1, 0, 0], expected: tests['Objective above 1'].expected};
+tests['Objective below 2'] = {inputs: [1, 0, 0, 0, 0,-1, 0, 0], expected: tests['Objective below 1'].expected};
+tests['Objective above 3'] = {inputs: [0, 0, 1, 1, 0, 0, 0, 1], expected: ['up', 'o2']};
+tests['Objective below 3'] = {inputs: [0, 0, 1, 1, 0, 0, 0,-1], expected: ['down', 'o2']};
+tests['Objective above 4'] = {inputs: [0, 1, 0, 0, 0, 0, 0, 1], expected: tests['Objective above 3'].expected};
+tests['Objective below 4'] = {inputs: [1, 0, 0, 0, 0, 0, 0,-1], expected: tests['Objective below 3'].expected};
+tests['Objective left 1'] = {inputs: [0, 1, 0, 0, 0, 1, 0, 0], expected: ['left', 'o1']};
+tests['Objective right 1'] = {inputs: [1, 0, 0, 0, 0,-1, 0, 0], expected: ['right', 'o1']};
+tests['Objective left 2'] = {inputs: [0, 1, 0, 0, 0, 1, 0, 0], expected: tests['Objective left 1'].expected};
+tests['Objective right 2'] = {inputs: [1, 0, 0, 0, 0,-1, 0, 0], expected: tests['Objective right 1'].expected};
+tests['Objective left 3'] = {inputs: [0, 0, 1, 1, 0, 0, 0, 1], expected: ['left', 'o2']};
+tests['Objective right 3'] = {inputs: [0, 0, 1, 1, 0, 0, 0,-1], expected: ['right', 'o2']};
+tests['Objective left 4'] = {inputs: [0, 1, 0, 0, 0, 0, 0, 1], expected: tests['Objective left 3'].expected};
+tests['Objective right 4'] = {inputs: [1, 0, 0, 0, 0, 0, 0,-1], expected: tests['Objective right 3'].expected};
+
+// Run
+runStages();
+	</code>
+	</div>
+	<br/>
+	<!--code>
+/* Manual operations: run if needed */
+addAllLayer(2); // Add new hidden layer
+addAllNeuron(1); // Add neuron in hidden layer
+removeAllNeuron(); // Remove one neuron to all (picked up randomly in hidden layers !!!)
+	</code-->
+</body>
+</html>
